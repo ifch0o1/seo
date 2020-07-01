@@ -1,0 +1,12 @@
+body, html, .table {
+    color: #292929;
+}
+
+.form-control {
+    color: #292929;
+    border: 1px solid #c6ced1;
+}
+
+.database-tables tr .bread_actions {
+    opacity: .8;
+}
