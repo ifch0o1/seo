@@ -10,3 +10,7 @@ body, html, .table {
 .database-tables tr .bread_actions {
     opacity: .8;
 }
+
+a, button, .material-icons {
+    
+}

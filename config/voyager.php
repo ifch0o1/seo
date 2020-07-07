@@ -189,10 +189,11 @@ return [
     'additional_css' => [
         'css/theme_overrides.css',
         'css/custom.css',
+        "https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css"
     ],
 
     'additional_js' => [
-        //'js/custom.js',
+        'js/custom.js',
     ],
 
     'googlemaps' => [

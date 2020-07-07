@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\KeywordCrapperController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,6 +18,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('admin/keyword-crapper', "KeywordCrapperController");
+
+Route::post('api/custom_python_test', 'KeywordCrapperController@custom');
+
+Route::post('api/push_python_words', 'KeywordCrapperController@push_python_words');
 
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
