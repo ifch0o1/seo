@@ -36,7 +36,7 @@ class KeywordCrapperController extends Controller {
         $level = $request->input('level');
 
         # Executing selenium
-        exec("export PYTHONIOENCODING=utf-8 && /usr/bin/python3 /var/www/html/seo/SEO_py/keyword-crapper.py $keyword $level 2>&1", $output);
+        exec("export PYTHONIOENCODING=utf-8 && /usr/bin/python3 /var/www/html/seo/SEO_py/keyword-crapper.py '$keyword' $level 2>&1", $output);
         echo "<pre>";
         print_r($output);
         echo "</pre>";
@@ -57,11 +57,15 @@ class KeywordCrapperController extends Controller {
 
     private function insert_keywords($keyword_arr) {
         $keywords = [];
-
+        $max_crap_id = DB::table('keywords')->max('crap_id');
+        $thisCrapId = (int)$max_crap_id + 1;
+        
         foreach($keyword_arr as $kw) {
             $keywords[] = [
                 "level" => $kw['level'],
-                "keyword" => $kw['name']
+                "keyword" => $kw['name'],
+                "crap_id" => $thisCrapId,
+                "admin_accepted" => 0
             ];
 
             // Recursive add childrens

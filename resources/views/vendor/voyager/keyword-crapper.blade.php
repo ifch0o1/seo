@@ -2,6 +2,7 @@
 
 @section('head')
     <script src="{{ asset('js/libs/vue.js') }}"></script>
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> 
 @stop
 
 @section('page_title', "Keyword Crapper")
@@ -46,8 +47,8 @@
                                 <div class="form-group">
                                     <label for="" class="control-label">
                                         Символи
-                                        <span class="badge badge-primary cursor-pointer" @click="inputLatin">Кирилица</span>
-                                        <span class="badge badge-primary cursor-pointer" @click="inputCyrilic">Латиница</span>
+                                        <span class="badge badge-primary cursor-pointer" @click="inputCyrilic">Кирилица</span>
+                                        <span class="badge badge-primary cursor-pointer" @click="inputLatin">Латиница</span>
                                         <span class="badge badge-primary cursor-pointer" @click="addNumbers">С цифри</span>
                                         <span class="badge badge-primary cursor-pointer" @click="removeNumbers">Без цифри</span>
                                     </label>
@@ -69,7 +70,7 @@
 @section('javascript')
 <script>
     var cyrilicS = 'абвгдежзийклмнопстуфхцчшщюя'
-    var latinS = 'qwertyuiopasdfghjklzxcvbnm1234567890'
+    var latinS = 'qwertyuiopasdfghjklzxcvbnm'
     var numbers = '1234567890'
 
     var vm = new Vue({
@@ -97,6 +98,8 @@
                     this.keyword = '';
 
                     console.log(res)
+                }).error(() => {
+                    this.loading = false;
                 })
             },
             inputLatin() {
