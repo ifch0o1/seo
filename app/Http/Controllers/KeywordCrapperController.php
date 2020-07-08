@@ -23,6 +23,14 @@ class KeywordCrapperController extends Controller {
         ]);
     }
 
+    public function update(Request $request, $id){
+        $keyword = Keyword::findORFail($id);
+        
+        $input = $request->all();
+
+        $keyword->fill($input)->save();
+    }
+
     /**
      * This custom function working only on linux server with enabled:
      * 1. selenium standalone server

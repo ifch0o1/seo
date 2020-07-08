@@ -55,3 +55,19 @@ Vue.component("select2", {
         $(this.$el).off().select2("destroy");
     },
 });
+
+function checkbox_updateRow(el) {
+    let id = el.getAttribute('row-id')
+    let field = el.getAttribute('row-field')
+    let model = el.getAttribute('row-model')
+    let value = +$(el).is(':checked');
+
+    let data = {};
+    data[field] = value;
+
+    $.ajax({
+        method: "PUT",
+        url: `/api/${model}/${id}`,
+        data
+    })
+}

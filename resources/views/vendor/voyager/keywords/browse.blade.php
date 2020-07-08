@@ -166,7 +166,27 @@
                                                         {{ $data->{$row->field} }}
                                                     @endif
                                                 @elseif($row->type == 'checkbox')
-                                                    @if(property_exists($row->details, 'on') && property_exists($row->details, 'off'))
+
+                                                    {{-- IVO CUSTOM CHECKBOX 
+                                                        (controlled in custom.js) 
+                                                    --}}
+
+                                                    <input type="checkbox" 
+                                                        class="custom-browse-checkbox"
+                                                        onchange="checkbox_updateRow(this)"
+                                                        @if($data->{$row->field})
+                                                            checked
+                                                        @endif
+                                                        row-field="{{ $row->field }}" 
+                                                        row-model="{{$dataType->name}}"
+                                                        row-id="{{ $data->getKey() }}"
+                                                    >
+
+                                                    {{-- END IVO CUSTOM CHECKBOX --}}
+
+                                                    {{-- OLD CHECKBOX - default by the theme --}}
+
+                                                    {{-- @if(property_exists($row->details, 'on') && property_exists($row->details, 'off'))
                                                         @if($data->{$row->field})
                                                             <span class="label label-info">{{ $row->details->on }}</span>
                                                         @else
@@ -174,7 +194,9 @@
                                                         @endif
                                                     @else
                                                     {{ $data->{$row->field} }}
-                                                    @endif
+                                                    @endif --}}
+
+                                                    {{-- END OLD CHECKBOX --}}
                                                 @elseif($row->type == 'color')
                                                     <span class="badge badge-lg" style="background-color: {{ $data->{$row->field} }}">{{ $data->{$row->field} }}</span>
                                                 @elseif($row->type == 'text')
