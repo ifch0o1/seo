@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Keyword;
+use App\Industry;
 use Illuminate\Support\Facades\DB;
 
 class KeywordCrapperController extends Controller {
@@ -16,7 +17,10 @@ class KeywordCrapperController extends Controller {
     private $level = null;
 
     public function __invoke(Request $request){
-        return view('vendor/voyager/keyword-crapper');
+        $industries = Industry::all();
+        return view('vendor/voyager/keyword-crapper', [
+            'industries' => $industries
+        ]);
     }
 
     /**
@@ -33,10 +37,11 @@ class KeywordCrapperController extends Controller {
         $keyword = $request->input('keyword');
         $level = $request->input('level');
         $keyword_UTF8 = $keyword;
-        $level = $request->input('level');
+        $symbols = $request->input('symbols');
+        $industry = $request->input('industry');
 
         # Executing selenium
-        exec("export PYTHONIOENCODING=utf-8 && /usr/bin/python3 /var/www/html/seo/SEO_py/keyword-crapper.py '$keyword' $level 2>&1", $output);
+        exec("export PYTHONIOENCODING=utf-8 && /usr/bin/python3 /var/www/html/seo/SEO_py/keyword-crapper.py '$keyword' $level '$symbols' '$industry' 2>&1", $output);
         echo "<pre>";
         print_r($output);
         echo "</pre>";
@@ -47,30 +52,43 @@ class KeywordCrapperController extends Controller {
 
         // Laravel gives me array instead of json.
         $keywords_arr = $request->keywords_json;
+        $industry = $request->industry;
+
         if (!$keywords_arr || empty($keywords_arr)) {
             return abort(500, 'Selenium empty data.');
         }
 
-        $keywords = $this->insert_keywords($keywords_arr);
-        DB::table('keywords')->insert($keywords);
-    }
-
-    private function insert_keywords($keyword_arr) {
-        $keywords = [];
         $max_crap_id = DB::table('keywords')->max('crap_id');
         $thisCrapId = (int)$max_crap_id + 1;
+        $keywords = $this->insert_keywords($keywords_arr, $thisCrapId);
+        if ($industry) {
+            foreach($keywords as &$kw) {
+
+                // TODO check and remove duplicates.
+                
+                $kw['industry_id'] = $industry;
+                $kw['created_at'] = date('Y-m-d H:i:s');
+            }
+        }
+        DB::table('keywords')->insert($keywords, $thisCrapId);
+
+        echo count($keywords);
+    }
+
+    private function insert_keywords($keyword_arr, $crap_id) {
+        $keywords = [];
         
         foreach($keyword_arr as $kw) {
             $keywords[] = [
                 "level" => $kw['level'],
                 "keyword" => $kw['name'],
-                "crap_id" => $thisCrapId,
+                "crap_id" => $crap_id,
                 "admin_accepted" => 0
             ];
 
-            // Recursive add childrens
-            if (!empty($keyword_arr['childrens'])) {
-                array_push($keywords, $this->insert_keywords($keyword_arr['childrens']));
+            // Recursive add children
+            if (!empty($kw['children'])) {
+                $keywords = array_merge($keywords, $this->insert_keywords($kw['children'], $crap_id));
             }
         }
 

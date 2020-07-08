@@ -18,11 +18,12 @@ import requests
 
 base_keyword = str(sys.argv[1])
 base_keyword = base_keyword.replace("_", " ")
-# print(base_keyword)
-
 request_level = int(sys.argv[2])
-
-symbols = "аб"
+symbols = str(sys.argv[3]).encode('utf-8', 'surrogateescape').decode('utf-8')
+if sys.argv[4]:
+    industry = int(sys.argv[4])
+else:
+    industry = ''
 
 # Server connection
 if str(sys.argv).count('local') > 0:
@@ -57,8 +58,9 @@ def get_suggestions(keyword):
     for li in driver.find_elements_by_css_selector('[role="listbox"] > li'):
         text = li.text.strip()
         if len(text) > 0:
-            if text.count(keyword) == 0:
-                text = keyword + ' ' + text
+            if text.lower().count(keyword.lower()) == 0:
+                if (text.count(' ') <= 1):
+                    text = keyword + ' ' + text
             array.append(text)
 
     return array
@@ -96,8 +98,10 @@ result = process_keyword_with_symbols(base_keyword)
 
 r = requests.post('http://www.seo-tracktor.com/api/push_python_words',
                     # data=json.dumps({'keywords_json': result})
-                    json={'keywords_json': result},
+                    json={'keywords_json': result, 'industry': industry},
                     headers={'Content-Type': 'application/json; charset=utf-8'})
+
+print("Sending request to php... The response is:")
 
 print(r.text)
 

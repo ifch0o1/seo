@@ -2,7 +2,12 @@
 
 @section('head')
     <script src="{{ asset('js/libs/vue.js') }}"></script>
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> 
+
+    <script type="text/x-template" id="select2-template">
+        <select>
+            <slot></slot>
+        </select>
+    </script>
 @stop
 
 @section('page_title', "Keyword Crapper")
@@ -31,7 +36,6 @@
 
                         <div v-if="ready" class="alert alert-success text-2xl">Ready</div>
 
-
                         <form v-if="!loading">
                             <div class="col-6">
                                 <div class="form-group">
@@ -45,12 +49,23 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label for="" class="control-label">Industry</label>
+                                    <select2 :options="industries" v-model="industry"></select2>
+                                    {{-- <select class="form-control select2" name="industry" v-model="industry" id="industry">
+                                        <option value="" selected='selected'>Без индустрия</option>
+                                        @foreach ($industries as $industry)
+                                            <option value="{{ $industry->id }}"> {{ $industry->name }} </option>
+                                        @endforeach
+                                    </select> --}}
+                                </div>
+
+                                <div class="form-group">
                                     <label for="" class="control-label">
-                                        Символи
-                                        <span class="badge badge-primary cursor-pointer" @click="inputCyrilic">Кирилица</span>
-                                        <span class="badge badge-primary cursor-pointer" @click="inputLatin">Латиница</span>
-                                        <span class="badge badge-primary cursor-pointer" @click="addNumbers">С цифри</span>
-                                        <span class="badge badge-primary cursor-pointer" @click="removeNumbers">Без цифри</span>
+                                        Symbols
+                                        <span class="badge badge-info cursor-pointer" @click="inputCyrilic">Cyrilic</span>
+                                        <span class="badge badge-primary cursor-pointer" @click="inputLatin">Latin</span>
+                                        <span class="badge badge-success cursor-pointer" @click="addNumbers">Add Numbers</span>
+                                        <span class="badge badge-danger cursor-pointer" @click="removeNumbers">Remove Numbers</span>
                                     </label>
                                     <input type="text" v-model="symbols" placeholder="Level" class="form-control">
                                 </div>
@@ -68,10 +83,49 @@
 @stop
 
 @section('javascript')
+
 <script>
+    Vue.component("select2", {
+        props: ["options", "value"],
+        template: "#select2-template",
+        mounted: function () {
+            var vm = this;
+            $(this.$el)
+                // init select2
+                .select2({ data: this.options, width: '100%' })
+                .val(this.value)
+                .trigger("change")
+                // emit event on change.
+                .on("change", function () {
+                    vm.$emit("input", this.value);
+                });
+        },
+        watch: {
+            value: function (value) {
+                // update value
+                $(this.$el).val(value).trigger("change");
+            },
+            options: function (options) {
+                // update options
+                $(this.$el).empty().select2({ data: options });
+            },
+        },
+        destroyed: function () {
+            $(this.$el).off().select2("destroy");
+        },
+    });
+
+    Vue.config.devtools = true;
+
     var cyrilicS = 'абвгдежзийклмнопстуфхцчшщюя'
     var latinS = 'qwertyuiopasdfghjklzxcvbnm'
     var numbers = '1234567890'
+
+    var industries = JSON.parse(`{!! json_encode($industries) !!}`);
+
+    var select2_industries = industries.map((val) => {
+        return {id: val.id, text: val.name}
+    })
 
     var vm = new Vue({
         el: "#vue",
@@ -80,25 +134,32 @@
             keyword: "",
             level: 0,
             ready: false,
-            symbols: cyrilicS + latinS + numbers,
+            industry: '',
+            industries: select2_industries,
+            symbols: cyrilicS + latinS + numbers
         },
         methods: {
             start() {
-                if (!this.keyword) alert('no keyword.')
+                if (!this.keyword) {
+                    alert('no keyword.')
+                    return false
+                }
+                
                 this.loading = true;
                 this.ready = false;
 
-                $.post('http://www.seo-tracktor.com/api/custom_python_test', {
-                    "_token": "{{ csrf_token() }}",
-                    "keyword": this.keyword.replace(" ", "_"),
-                    "level": this.level
+                $.post('https://79.124.39.68/api/custom_python_test', {
+                    "keyword": this.keyword.replace(/\s+/g, '_').toLowerCase(),
+                    "level": this.level,
+                    "symbols": this.symbols,
+                    "industry": this.industry
                 }).done((res) => {
                     this.loading = false;
                     this.ready = true;
                     this.keyword = '';
 
                     console.log(res)
-                }).error(() => {
+                }, (err) => {
                     this.loading = false;
                 })
             },

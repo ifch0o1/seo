@@ -12,5 +12,5 @@ body, html, .table {
 }
 
 a, button, .material-icons {
-    
+    cursor: pointer;
 }
