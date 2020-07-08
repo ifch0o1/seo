@@ -157,31 +157,33 @@
 
                                                 @elseif(($row->type == 'select_dropdown' || $row->type == 'radio_btn') && property_exists($row->details, 'options'))
 
-                                                {{-- IVO SELECT DROPDOWN --}}
-                                                <select 
-                                                onchange="select_dropdown_updateRow(this)" 
+                                                
 
-                                                row-field="{{ $row->field }}" 
-                                                row-model="{{$dataType->name}}"
-                                                row-id="{{ $data->getKey() }}"
+                                                    @if($row->type == 'select_dropdown')
+                                                        {{-- IVO SELECT DROPDOWN --}}
+                                                        <select 
+                                                        onchange="select_dropdown_updateRow(this)" 
 
-                                                class="form-control"
-                                                >
-                                                    @foreach($row->details->options as $key => $value)
-                                                        <option 
-                                                        value="{{$key}}"
-                                                        @if($key == $row->details->options->{$data->{$row->field}})
-                                                            selected
-                                                        @endif
-                                                        >{{$value}}</option>
-                                                    @endforeach
-                                                </select>
+                                                        row-field="{{ $row->field }}" 
+                                                        row-model="{{$dataType->name}}"
+                                                        row-id="{{ $data->getKey() }}"
 
-                                                {{-- END IVO SELECT DROPDOWN --}}
-
-                                                {{-- OLD BLADE SELECT DROPDOWN --}}
-                                                    {{-- {!! $row->details->options->{$data->{$row->field}} ?? '' !!} --}}
-                                                {{-- END OLD BLADE SELECT DROPDOWN --}}
+                                                        class="form-control"
+                                                        >
+                                                            @foreach($row->details->options as $key => $value)
+                                                                <option 
+                                                                value="{{$key}}"
+                                                                test="$data->{$row->field}"
+                                                                {{-- @if($key == $row->details->options->{$data->{$row->field}}) --}}
+                                                                    {{-- selected --}}
+                                                                {{-- @endif --}}
+                                                                >{{$value}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    {{-- END IVO SELECT DROPDOWN --}}
+                                                    @else
+                                                        {!! $row->details->options->{$data->{$row->field}} ?? '' !!}
+                                                    @endif
 
                                                 @elseif($row->type == 'date' || $row->type == 'timestamp')
                                                     @if ( property_exists($row->details, 'format') && !is_null($data->{$row->field}) )
