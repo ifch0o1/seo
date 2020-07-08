@@ -170,14 +170,16 @@
 
                                                         class="form-control"
                                                         >
+                                                            <option value="">Choose</option>
                                                             @foreach($row->details->options as $key => $value)
                                                                 <option 
                                                                 value="{{$key}}"
-                                                                test="$data->{$row->field}"
-                                                                {{-- @if($key == $row->details->options->{$data->{$row->field}}) --}}
-                                                                    {{-- selected --}}
-                                                                {{-- @endif --}}
-                                                                >{{$value}}</option>
+                                                                @if($data->{$row->field} && $key == $row->details->options->{$data->{$row->field}})
+                                                                    selected
+                                                                @endif
+                                                                >
+                                                                    {{$value}}
+                                                                </option>
                                                             @endforeach
                                                         </select>
                                                     {{-- END IVO SELECT DROPDOWN --}}
