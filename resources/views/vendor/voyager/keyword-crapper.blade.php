@@ -159,8 +159,10 @@
                     this.keyword = '';
 
                     console.log(res)
-                }, (err) => {
+                }).fail((res) => {
                     this.loading = false;
+                    console.error(res)
+                    alert(res)
                 })
             },
             inputLatin() {
