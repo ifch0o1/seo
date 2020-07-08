@@ -148,7 +148,7 @@
                 this.loading = true;
                 this.ready = false;
 
-                $.post('https://79.124.39.68/api/custom_python_test', {
+                $.post('http://79.124.39.68/api/custom_python_test', {
                     "keyword": this.keyword.replace(/\s+/g, '_').toLowerCase(),
                     "level": this.level,
                     "symbols": this.symbols,
