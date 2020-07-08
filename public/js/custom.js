@@ -56,18 +56,51 @@ Vue.component("select2", {
     },
 });
 
+function getAttrs_updateRow(el, type) {
+    let data = {};
+
+    data['id'] = el.getAttribute('row-id')
+    data['field'] = el.getAttribute('row-field')
+    data['model'] = el.getAttribute('row-model')
+    data['value'] = undefined;
+
+    switch (type) {
+        case 'checkbox':
+            data['value'] = +$(el).is(':checked');
+            break;
+        case 'select_dropdown':
+            data['value'] = +$(el).val();
+        default:
+            break;
+    }
+
+    if (typeof data.value == 'undefined') console.warn("getAttrs_updateRow() cannot catch the value")
+
+    return data;
+}
+
 function checkbox_updateRow(el) {
-    let id = el.getAttribute('row-id')
-    let field = el.getAttribute('row-field')
-    let model = el.getAttribute('row-model')
-    let value = +$(el).is(':checked');
+    let attrs = getAttrs_updateRow(el, 'checkbox')
 
     let data = {};
-    data[field] = value;
+    data[attrs.field] = attrs.value;
 
     $.ajax({
         method: "PUT",
-        url: `/api/${model}/${id}`,
+        url: `/api/${attrs.model}/${attrs.id}`,
+        data
+    })
+}
+
+function select_dropdown_updateRow(el) {
+    let attrs = getAttrs_updateRow(el, 'select_dropdown')
+
+    let data = {};
+    data[attrs.field] = attrs.value;
+
+    $.ajax({
+        method: "PUT",
+        url: `/api/${attrs.model}/${attrs.id}`,
         data
     })
 }

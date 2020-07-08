@@ -157,7 +157,31 @@
 
                                                 @elseif(($row->type == 'select_dropdown' || $row->type == 'radio_btn') && property_exists($row->details, 'options'))
 
-                                                    {!! $row->details->options->{$data->{$row->field}} ?? '' !!}
+                                                {{-- IVO SELECT DROPDOWN --}}
+                                                <select 
+                                                onchange="select_dropdown_updateRow(this)" 
+
+                                                row-field="{{ $row->field }}" 
+                                                row-model="{{$dataType->name}}"
+                                                row-id="{{ $data->getKey() }}"
+
+                                                class="form-control"
+                                                >
+                                                    @foreach($row->details->options as $key => $value)
+                                                        <option 
+                                                        value="{{$key}}"
+                                                        @if($key == $row->details->options->{$data->{$row->field}})
+                                                            selected
+                                                        @endif
+                                                        >{{$value}}</option>
+                                                    @endforeach
+                                                </select>
+
+                                                {{-- END IVO SELECT DROPDOWN --}}
+
+                                                {{-- OLD BLADE SELECT DROPDOWN --}}
+                                                    {{-- {!! $row->details->options->{$data->{$row->field}} ?? '' !!} --}}
+                                                {{-- END OLD BLADE SELECT DROPDOWN --}}
 
                                                 @elseif($row->type == 'date' || $row->type == 'timestamp')
                                                     @if ( property_exists($row->details, 'format') && !is_null($data->{$row->field}) )

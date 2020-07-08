@@ -25,7 +25,7 @@ class KeywordCrapperController extends Controller {
 
     public function update(Request $request, $id){
         $keyword = Keyword::findORFail($id);
-        
+
         $input = $request->all();
 
         $keyword->fill($input)->save();
