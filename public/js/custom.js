@@ -56,6 +56,10 @@ Vue.component("select2", {
     },
 });
 
+function getTextElementFromIcon(el) {
+    return $(el).parents('[row-text-content-parent]').find('[row-text-content]')
+}
+
 function getAttrs_updateRow(el, type) {
     let data = {};
 
@@ -68,8 +72,15 @@ function getAttrs_updateRow(el, type) {
         case 'checkbox':
             data['value'] = +$(el).is(':checked');
             break;
+
         case 'select_dropdown':
-            data['value'] = +$(el).val();
+            data['value'] = $(el).val();
+            break;
+
+        case 'text':
+            data['value'] = getTextElementFromIcon(el).text().trim();
+            break;
+
         default:
             break;
     }
@@ -103,4 +114,47 @@ function select_dropdown_updateRow(el) {
         url: `/api/${attrs.model}/${attrs.id}`,
         data
     })
+}
+
+function text_updateRow(el) {
+    let attrs = getAttrs_updateRow(el, 'text');
+    let $el = $(el);
+
+    Swal.fire({
+        title: `Editing keyword #${attrs.id}`,
+        input: "textarea",
+        inputValue: attrs.value,
+        inputAttributes: {
+            autocapitalize: "off",
+            id: 'swal_kw_input'
+        },
+        showCancelButton: true,
+        confirmButtonText: "Save",
+        showLoaderOnConfirm: true,
+        preConfirm: (keyword) => {
+            if (!keyword) alert("No keyword value");
+
+            let data = {};
+            data[attrs.field] = keyword
+            $.ajax({
+                method: "PUT",
+                url: `/api/${attrs.model}/${attrs.id}`,
+                data
+            })
+            .done((res) => {
+                getTextElementFromIcon(el).text(keyword)
+            })
+            .fail((res) => {
+                console.log('fail');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error occured',
+                    text: "Cannot save the keyword. Capture the network request for more info",
+                })
+            })
+        },
+        allowOutsideClick: () => !Swal.isLoading(),
+    })
+    
+    console.log(attrs);
 }

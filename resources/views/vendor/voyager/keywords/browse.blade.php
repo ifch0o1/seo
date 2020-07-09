@@ -228,8 +228,32 @@
                                                 @elseif($row->type == 'color')
                                                     <span class="badge badge-lg" style="background-color: {{ $data->{$row->field} }}">{{ $data->{$row->field} }}</span>
                                                 @elseif($row->type == 'text')
+
                                                     @include('voyager::multilingual.input-hidden-bread-browse')
-                                                    <div>{{ mb_strlen( $data->{$row->field} ) > 200 ? mb_substr($data->{$row->field}, 0, 200) . ' ...' : $data->{$row->field} }}</div>
+                                                    <div row-text-content-parent>
+                                                        <span row-text-content>
+                                                            {{ mb_strlen( $data->{$row->field} ) > 200 ? mb_substr($data->{$row->field}, 0, 200) . ' ...' : $data->{$row->field} }}
+                                                        </span>
+                                                        
+                                                        {{-- IVO CUSTOM EDIT TEXT FIELD --}}
+
+                                                        @if(property_exists($row->details, 'textEditable'))
+                                                            <span class="hover-icon-1 inline-block">
+                                                                <i 
+                                                                row-field="{{ $row->field }}" 
+                                                                row-model="{{$dataType->name}}"
+                                                                row-id="{{ $data->getKey() }}"
+    
+                                                                onclick="text_updateRow(this)" 
+    
+                                                                class="voyager-pen table-text-icon" 
+                                                                title="Inline edit"></i>
+                                                            </span>
+                                                        @endif
+
+                                                        {{-- IVO CUSTOM EDIT TEXT FIELD END --}}
+                                                    </div>
+
                                                 @elseif($row->type == 'text_area')
                                                     @include('voyager::multilingual.input-hidden-bread-browse')
                                                     <div>{{ mb_strlen( $data->{$row->field} ) > 200 ? mb_substr($data->{$row->field}, 0, 200) . ' ...' : $data->{$row->field} }}</div>

@@ -96,7 +96,7 @@ def process_keyword_with_symbols(keyword, level = 1):
 
 result = process_keyword_with_symbols(base_keyword)
 
-r = requests.post('http://www.seo-tracktor.com/api/push_python_words',
+r = requests.post('http://seo.maxprogress.bg/api/push_python_words',
                     # data=json.dumps({'keywords_json': result})
                     json={'keywords_json': result, 'industry': industry},
                     headers={'Content-Type': 'application/json; charset=utf-8'})

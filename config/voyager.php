@@ -194,6 +194,7 @@ return [
 
     'additional_js' => [
         'js/custom.js',
+        'js/libs/sweetalert2-v9.js',
     ],
 
     'googlemaps' => [
