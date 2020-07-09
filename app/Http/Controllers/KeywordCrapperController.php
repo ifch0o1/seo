@@ -63,7 +63,7 @@ class KeywordCrapperController extends Controller {
         $industry = $request->industry;
 
         if (!$keywords_arr || empty($keywords_arr)) {
-            return abort(500, 'Selenium empty data.');
+            print_r("___NO_DATA_EXCEPTION___");
         }
 
         $max_crap_id = DB::table('keywords')->max('crap_id');

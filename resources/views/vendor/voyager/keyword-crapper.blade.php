@@ -158,6 +158,16 @@
                     this.ready = true;
                     this.keyword = '';
 
+                    if (res.indexOf('___NO_DATA_EXCEPTION___') !== -1) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'No data.',
+                            text: 'The google did not return any suggestions for this keyword! Sorry :(',
+                            footer: 'Test it your self to catch the problem.'
+                        })
+                        this.ready = false;
+                    }
+
                     console.log(res)
                 }).fail((res) => {
                     this.loading = false;
