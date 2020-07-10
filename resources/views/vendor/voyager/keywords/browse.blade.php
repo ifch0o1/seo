@@ -34,6 +34,17 @@
         @endforeach
         @include('voyager::multilingual.language-selector')
     </div>
+
+    <div class="container-fluid" id="filtersVue">
+        <div class="row">
+            <div class="col-md-3">
+                <span>Industry filter</span>
+                <select2 :options="industries" v-model="industry" @input="industryFilter">
+                    <option value="">All</option>
+                </select2>
+            </div>
+        </div>
+    </div>
 @stop
 
 @section('content')
@@ -461,5 +472,35 @@
             });
             $('.selected_ids').val(ids);
         });
+    </script>
+
+
+    {{-- IVO SCRIPTS --}}
+
+    @include('libs.vue')
+
+    <script>
+        let filtersVue = new Vue({
+            el: "#filtersVue",
+            data: {
+                industries: [],
+                industry: '{{ $search->value }}' || ''
+            },
+            methods: {
+                industryFilter(val) {
+                    if (val) {
+                        window.location.search = `?key=industry_id&filter=equals&s=${val}`
+                    } else {
+                        window.location.search = ``
+                    }
+                }
+            },
+            mounted() {
+                $.get('/api/industry')
+                    .done((res) => {
+                        this.industries = res.map((val) => ({id: val.id, text: val.name}));
+                    })
+            }
+        })
     </script>
 @stop

@@ -102,4 +102,20 @@ class KeywordCrapperController extends Controller {
 
         return $keywords;
     }
+
+    // GLOBAL KEYWORD FUNCTION 
+    // API AND OTHERS.
+    /**
+     * TODO: Create KeywordController
+     * And move this functionality inside KeywordController.
+     */
+    public function get_api_handler(Request $request) {
+        $keywordsQB = Keyword::where("admin_accepted", '1');
+
+        $industry = $request->input('industry_id');
+        if ($industry) {
+            $keywordsQB->where('industry_id', $industry);
+        }
+        return $keywordsQB->get();
+    }
 }

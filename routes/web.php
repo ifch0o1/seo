@@ -18,13 +18,29 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('admin/keyword-crapper', "KeywordCrapperController");
+Route::get('admin/keyword-crapper', "KeywordCrapperController")
+    ->middleware('auth');
 
-Route::post('api/custom_python_test', 'KeywordCrapperController@custom');
+Route::get('admin/aida-generator', "AidaGeneratorController")
+    ->middleware('auth');
 
-Route::resource('api/keywords', "KeywordCrapperController");
+Route::post('admin/aida-generator/generate', "AidaGeneratorController@generate")
+    ->middleware('auth');
 
-Route::post('api/push_python_words', 'KeywordCrapperController@push_python_words');
+Route::post('api/custom_python_test', 'KeywordCrapperController@custom')
+    ->middleware('auth');
+
+Route::resource('api/keywords', "KeywordCrapperController")
+    ->middleware('auth');
+
+Route::apiResource('api/industry', "API\IndustryController")
+    ->middleware('auth');
+
+Route::post('api/push_python_words', 'KeywordCrapperController@push_python_words')
+    ->middleware('auth');
+
+Route::get('api/keywords', 'KeywordCrapperController@get_api_handler')
+    ->middleware('auth');
 
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();

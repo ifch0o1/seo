@@ -1,15 +1,5 @@
 @extends('voyager::master')
 
-@section('head')
-    <script src="{{ asset('js/libs/vue.js') }}"></script>
-
-    <script type="text/x-template" id="select2-template">
-        <select>
-            <slot></slot>
-        </select>
-    </script>
-@stop
-
 @section('page_title', "Keyword Crapper")
 
 @section('page_header')
@@ -50,13 +40,9 @@
 
                                 <div class="form-group">
                                     <label for="" class="control-label">Industry</label>
-                                    <select2 :options="industries" v-model="industry"></select2>
-                                    {{-- <select class="form-control select2" name="industry" v-model="industry" id="industry">
-                                        <option value="" selected='selected'>Без индустрия</option>
-                                        @foreach ($industries as $industry)
-                                            <option value="{{ $industry->id }}"> {{ $industry->name }} </option>
-                                        @endforeach
-                                    </select> --}}
+                                    <select2 :options="industries" v-model="industry">
+                                        <option disabled value="">Select one</option>
+                                    </select2>
                                 </div>
 
                                 <div class="form-group">
@@ -84,110 +70,81 @@
 
 @section('javascript')
 
-<script>
-    Vue.component("select2", {
-        props: ["options", "value"],
-        template: "#select2-template",
-        mounted: function () {
-            var vm = this;
-            $(this.$el)
-                // init select2
-                .select2({ data: this.options, width: '100%' })
-                .val(this.value)
-                .trigger("change")
-                // emit event on change.
-                .on("change", function () {
-                    vm.$emit("input", this.value);
-                });
-        },
-        watch: {
-            value: function (value) {
-                // update value
-                $(this.$el).val(value).trigger("change");
+    @include('libs.vue')
+
+    <script>
+        var cyrilicS = 'абвгдежзийклмнопстуфхцчшщюя'
+        var latinS = 'qwertyuiopasdfghjklzxcvbnm'
+        var numbers = '1234567890'
+
+        var industries = JSON.parse(`{!! json_encode($industries) !!}`);
+
+        var select2_industries = industries.map((val) => ({id: val.id, text: val.name}))
+
+        var vm = new Vue({
+            el: "#vue",
+            data: {
+                loading: false,
+                keyword: "",
+                level: 0,
+                ready: false,
+                industry: '',
+                industries: select2_industries,
+                symbols: cyrilicS + latinS + numbers
             },
-            options: function (options) {
-                // update options
-                $(this.$el).empty().select2({ data: options });
-            },
-        },
-        destroyed: function () {
-            $(this.$el).off().select2("destroy");
-        },
-    });
-
-    Vue.config.devtools = true;
-
-    var cyrilicS = 'абвгдежзийклмнопстуфхцчшщюя'
-    var latinS = 'qwertyuiopasdfghjklzxcvbnm'
-    var numbers = '1234567890'
-
-    var industries = JSON.parse(`{!! json_encode($industries) !!}`);
-
-    var select2_industries = industries.map((val) => {
-        return {id: val.id, text: val.name}
-    })
-
-    var vm = new Vue({
-        el: "#vue",
-        data: {
-            loading: false,
-            keyword: "",
-            level: 0,
-            ready: false,
-            industry: '',
-            industries: select2_industries,
-            symbols: cyrilicS + latinS + numbers
-        },
-        methods: {
-            start() {
-                if (!this.keyword) {
-                    alert('no keyword.')
-                    return false
-                }
-                
-                this.loading = true;
-                this.ready = false;
-
-                $.post('http://79.124.39.68/api/custom_python_test', {
-                    "keyword": this.keyword.replace(/\s+/g, '_').toLowerCase(),
-                    "level": this.level,
-                    "symbols": this.symbols,
-                    "industry": this.industry
-                }).done((res) => {
-                    this.loading = false;
-                    this.ready = true;
-                    this.keyword = '';
-
-                    if (res.indexOf('___NO_DATA_EXCEPTION___') !== -1) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'No data.',
-                            text: 'The google did not return any suggestions for this keyword! Sorry :(',
-                            footer: 'Test it your self to catch the problem.'
-                        })
-                        this.ready = false;
+            methods: {
+                start() {
+                    if (!this.keyword) {
+                        alert('no keyword.')
+                        return false
                     }
+                    
+                    this.loading = true;
+                    this.ready = false;
 
-                    console.log(res)
-                }).fail((res) => {
-                    this.loading = false;
-                    console.error(res)
-                    alert(res)
-                })
+                    $.post('http://79.124.39.68/api/custom_python_test', {
+                        "keyword": this.keyword.replace(/\s+/g, '_').toLowerCase(),
+                        "level": this.level,
+                        "symbols": this.symbols,
+                        "industry": this.industry
+                    }).done((res) => {
+                        this.loading = false;
+                        this.ready = true;
+
+                        if (res.indexOf('___NO_DATA_EXCEPTION___') !== -1) {
+                            this.ready = false;
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'No data.',
+                                text: 'The google did not return any suggestions for this keyword! Sorry :(',
+                                footer: 'Test it your self to catch the problem.'
+                            })
+
+                        } else {
+                            this.keyword = '';
+                        }
+
+                        console.log(res)
+                    }).fail((res) => {
+                        this.loading = false;
+                        console.error(res)
+                        alert(res)
+                    })
+                },
+                inputLatin() {
+                    this.symbols = latinS
+                },
+                inputCyrilic() {
+                    this.symbols = cyrilicS
+                },
+                addNumbers() {
+                    this.symbols = removeDuplicateCharacters(this.symbols + numbers);
+                },
+                removeNumbers() {
+                    this.symbols = this.symbols.replace(/\d+/g, '');
+                }
             },
-            inputLatin() {
-                this.symbols = latinS
-            },
-            inputCyrilic() {
-                this.symbols = cyrilicS
-            },
-            addNumbers() {
-                this.symbols = removeDuplicateCharacters(this.symbols + numbers);
-            },
-            removeNumbers() {
-                this.symbols = this.symbols.replace(/\d+/g, '');
-            }
-        },
-    })
-</script>
+        })
+    </script>
 @endsection
