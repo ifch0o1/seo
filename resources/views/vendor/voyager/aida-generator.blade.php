@@ -33,7 +33,7 @@
                                 </select2>
                             </div>
                             <div class="col-md-4">
-                                <span>AIDA Generations</span>
+                                <span>AIDA Tags</span>
                                 <input class="form-control" type="text" v-model="selectedTags">
                                 <span v-for="tag in tags" class="mr-2 my-2 badge badge-lg badge-primary cursor-pointer" @click="toggleTag(tag.id)">#@{{tag.id}} ( @{{tag.name}} )</span>
                             </div>
@@ -157,7 +157,7 @@
 
                     if (!this.industry_id) {errors.push(errorFiels['industry_id'])}
                     if (!this.client_id) {errors.push(errorFiels['client_id'])}
-                    if (!this.tags) {errors.push(errorFiels['tags'])}
+                    if (!this.selectedTags) {errors.push(errorFiels['tags'])}
                     if (!Object.keys(this.keywordsSeleted).length) {errors.push(errorFiels['keywords'])}
 
                     if (errors.length) {
