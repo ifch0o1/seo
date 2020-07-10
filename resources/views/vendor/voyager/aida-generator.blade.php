@@ -53,9 +53,9 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="(kw, index) in sortedKeywords">
+                                        <tr v-if="sortedKeywords.length" v-for="(kw, index) in sortedKeywords">
                                             <td class="border px-4 py-2 select-none">
-                                                <input type="checkbox" value="@{{kw.id}}" class="custom-browse-checkbox" v-model="keywordsSeleted[kw.id]">
+                                                <input type="checkbox" :value="kw.id" class="custom-browse-checkbox" v-model="selectedKeywords[kw.id]">
                                             </td>
                                             <td class="border px-4 py-2">@{{kw.keyword}}</td>
                                             <td class="border px-4 py-2">@{{kw.money_rank}}</td>
@@ -131,7 +131,7 @@
                 tags: tags,
                 selectedTags: "",
                 keywords: [],
-                keywordsSeleted: {},
+                selectedKeywords: {},
                 currentSort:'money_rank',
                 currentSortDir:'desc',
                 loadingKw: false
@@ -142,7 +142,17 @@
                         return false;
                     }
 
+                    let tagIds = this.selectedTags.split(',').map(tag => tag.trim()).filter(val => val);
+                    let keywordIds = Object.keys(this.selectedKeywords);
 
+                    $.post('/api/aida_posts/generate', {
+                        industry: this.industry_id,
+                        client: this.client_id,
+                        tagIds,
+                        keywordIds
+                    }).done(res => {
+                        console.log(res);
+                    });
                 },
                 validate() {
                     const errorFiels = {
@@ -158,7 +168,7 @@
                     if (!this.industry_id) {errors.push(errorFiels['industry_id'])}
                     if (!this.client_id) {errors.push(errorFiels['client_id'])}
                     if (!this.selectedTags) {errors.push(errorFiels['tags'])}
-                    if (!Object.keys(this.keywordsSeleted).length) {errors.push(errorFiels['keywords'])}
+                    if (!Object.keys(this.selectedKeywords).length) {errors.push(errorFiels['keywords'])}
 
                     if (errors.length) {
                         errorText = errors.join(', ');
@@ -199,7 +209,7 @@
                 },
                 toggelAllKeywords(ev) {
                     for(val of this.keywords) {
-                        this.keywordsSeleted[val.id] = ev.target.checked;
+                        this.selectedKeywords[val.id] = ev.target.checked;
                         this.$forceUpdate()
                     }
                 },

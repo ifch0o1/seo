@@ -28,6 +28,12 @@ class AidaGeneratorController extends Controller
     }
 
     public function generate(Request $request) {
+        $industry = $request->input('industry');
+        $client = $request->input('client');
+        $keywords = $request->input('keywordIds');
+        $tags = $request->input('tagIds');
+
         // TODO
+        return 1;
     }
 }

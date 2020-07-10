@@ -24,7 +24,7 @@ Route::get('admin/keyword-crapper', "KeywordCrapperController")
 Route::get('admin/aida-generator', "AidaGeneratorController")
     ->middleware('auth');
 
-Route::post('admin/aida-generator/generate', "AidaGeneratorController@generate")
+Route::post('api/aida_posts/generate', "AidaGeneratorController@generate")
     ->middleware('auth');
 
 Route::post('api/custom_python_test', 'KeywordCrapperController@custom')
