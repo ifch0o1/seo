@@ -15,8 +15,8 @@
     <div class="page-content container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <div class="panel panel-bordered">
-                    <div class="panel-body" id="vue">
+                <div class="panel panel-bordered" id="vue">
+                    <div class="panel-body">
                         <h4 class="h3 col-12">General parameters</h4>
 
                         <div class="row">
@@ -41,6 +41,26 @@
 
                         <div class="row">
                             <div class="col-md-8">
+
+                                <div class="w-full text-center" v-if="loadingKw || loadingPosts">
+                                    <x-preloader></x-preloader>
+                                </div>
+
+                                <h4 class="my-8" v-if="savedPosts.length">Generated Posts</h4>
+                                <table class="table-auto text-lg w-full" v-if="savedPosts.length">
+                                    <thead class="select-none">
+                                        <tr class="bg-gray-200">
+                                            <th class="px-4 py-2 cursor-pointer">Text</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="post in savedPosts">
+                                            <td class="border px-4 py-2" v-html="post.text"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <h4 class="my-8" v-if="keywords.length && !loadingKw">Approved keywords</h4>
                                 <table class="table-auto text-lg font-semibold w-full" v-if="keywords.length && !loadingKw">
                                     <thead class="select-none">
                                         <tr class="bg-gray-200">
@@ -59,15 +79,11 @@
                                             </td>
                                             <td class="border px-4 py-2">@{{kw.keyword}}</td>
                                             <td class="border px-4 py-2">@{{kw.money_rank}}</td>
-                                            <td class="border px-4 py-2">XXX</td>
+                                            <td class="border px-4 py-2">@{{kw.used}} times</td>
                                         </tr>
                                     </tbody>
                                 </table>
                                 <p class="text-lg" v-if="!keywords.length && !loadingKw">No approved keywords found</p>
-
-                                <div class="w-full text-center" v-if="loadingKw">
-                                    <x-preloader></x-preloader>
-                                </div>
                             </div>
 
                             <div class="col-md-4">
@@ -75,14 +91,14 @@
                                     <div class="presubmit-active-radios w-full select-none">
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="generate_activated" id="generate_activated1" value="0" checked>
+                                                <input type="radio" name="generate_activated" id="generate_activated1" value="0" v-model="generate_activated" checked>
                                                 Generate as Not approved (Deactivated)
                                             </label>
                                         </div>
     
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="generate_activated" id="generate_activated2" value="1">
+                                                <input type="radio" name="generate_activated" id="generate_activated2" v-model="generate_activated" value="1">
                                                 Generate as Approved
                                             </label>
                                         </div>
@@ -129,12 +145,15 @@
                 client_id: '',
                 clients: select2_clients,
                 tags: tags,
-                selectedTags: "",
+                selectedTags: "1,2,3,4",
                 keywords: [],
                 selectedKeywords: {},
                 currentSort:'money_rank',
                 currentSortDir:'desc',
-                loadingKw: false
+                loadingKw: false,
+                savedPosts: [],
+                generate_activated: 0,
+                loadingPosts: false
             },
             methods: {
                 start() {
@@ -144,14 +163,20 @@
 
                     let tagIds = this.selectedTags.split(',').map(tag => tag.trim()).filter(val => val);
                     let keywordIds = Object.keys(this.selectedKeywords);
+                    let selectedKeywordIds = keywordIds.filter(val => this.selectedKeywords[val]);
 
+                    this.loadingPosts = true;
                     $.post('/api/aida_posts/generate', {
                         industry: this.industry_id,
                         client: this.client_id,
                         tagIds,
-                        keywordIds
-                    }).done(res => {
-                        console.log(res);
+                        selectedKeywordIds,
+                        generate_activated: this.generate_activated
+                    }).done(savedPosts => {
+                        this.loadingPosts = false;
+                        if (savedPosts && savedPosts.length) {
+                            this.savedPosts = savedPosts;
+                        }
                     });
                 },
                 validate() {

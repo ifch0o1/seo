@@ -33,6 +33,8 @@ Route::post('api/custom_python_test', 'KeywordCrapperController@custom');
 
 Route::resource('api/keywords', "KeywordCrapperController");
 
+Route::resource('api/aida_posts', "AidaPostsController");
+
 Route::apiResource('api/industry', "API\IndustryController")
     ->middleware('auth');
 

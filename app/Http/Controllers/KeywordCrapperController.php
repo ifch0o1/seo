@@ -82,7 +82,6 @@ class KeywordCrapperController extends Controller {
 
         echo count($keywords);
     }
-
     private function insert_keywords($keyword_arr, $crap_id) {
         $keywords = [];
         

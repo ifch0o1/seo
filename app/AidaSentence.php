@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 
 class AidaSentence extends Model
 {
+    protected $fillable = array('*');
+    
     public function save(array $options = [])
     {
         // If no author has been assigned, assign the current user's id as the author of the post
