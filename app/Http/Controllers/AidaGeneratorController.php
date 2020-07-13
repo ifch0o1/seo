@@ -33,7 +33,11 @@ class AidaGeneratorController extends Controller
         $keywords = $request->input('keywordIds');
         $tags = $request->input('tagIds');
 
+        
         // TODO
+        // GENERATE POSTS
+
+
         return 1;
     }
 }

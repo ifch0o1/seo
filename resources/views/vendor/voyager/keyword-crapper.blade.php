@@ -35,7 +35,7 @@
 
                                 <div class="form-group">
                                     <label for="" class="control-label">Level</label>
-                                    <input type="text" v-model="level" placeholder="Level" class="form-control">
+                                    <input type="text" v-model="level" max="2" placeholder="Level" class="form-control">
                                 </div>
 
                                 <div class="form-group">
