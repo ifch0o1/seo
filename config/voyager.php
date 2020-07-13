@@ -194,7 +194,6 @@ return [
 
     'additional_js' => [
         'js/custom.js',
-        // 'js/aida-generator.js',
         'js/libs/sweetalert2-v9.js',
     ],
 

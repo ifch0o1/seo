@@ -20,6 +20,9 @@ base_keyword = str(sys.argv[1])
 base_keyword = base_keyword.replace("_", " ")
 request_level = int(sys.argv[2])
 symbols = str(sys.argv[3]).encode('utf-8', 'surrogateescape').decode('utf-8')
+
+symbols = ' ' + symbols
+
 if sys.argv[4]:
     industry = int(sys.argv[4])
 else:
@@ -47,6 +50,9 @@ def delete_input():
 def delete_last_word():
     search_box.send_keys(Keys.CONTROL + Keys.SHIFT + Keys.ARROW_LEFT)
     search_box.send_keys(Keys.DELETE)
+
+def delete_last_char():
+    search_box.send_keys(Keys.BACKSPACE)
 
 # Samo vrashta array s suggestionite
 def get_suggestions(keyword):
@@ -81,9 +87,9 @@ def process_keyword_with_symbols(keyword, level = 1):
     keyword_object = {}
     
     for c in symbols:
-        time.sleep(0.8)
+        time.sleep(0.2)
         search_box.send_keys(c)
-        time.sleep(1.2)
+        time.sleep(0.5)
 
         suggestions = get_suggestions(keyword)
         # recursion for.
@@ -92,12 +98,13 @@ def process_keyword_with_symbols(keyword, level = 1):
             if level <= request_level:
                 children = process_keyword_with_symbols(sug, level + 1)
             
-            keyword_object[sug] = {'level': level, 'children': children, 'name': sug}
+            keyword_object[sug] = {'level': level, 'name': sug, 'children': children}
             
-        delete_last_word()
+        delete_last_char()
     return keyword_object
 
 result = process_keyword_with_symbols(base_keyword)
+result = [{'level': 0, 'name': base_keyword, 'children': result}]
 
 r = requests.post(apiUrl,
                     # data=json.dumps({'keywords_json': result})
@@ -108,6 +115,6 @@ print("Sending request to php... The response is:")
 
 print(r.text)
 
-# print(json.dumps(result))
+print(json.dumps(result))
 
 driver.quit()

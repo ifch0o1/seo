@@ -68,48 +68,33 @@ class KeywordCrapperController extends Controller {
 
         $max_crap_id = DB::table('keywords')->max('crap_id');
         $thisCrapId = (int)$max_crap_id + 1;
-        $keywords = $this->insert_keywords($keywords_arr, $thisCrapId);
-
-        if ($industry) {
-            foreach($keywords as $key => &$kw) {
-                /**
-                 * Removing duplicates
-                 */
-                $kwExists = Keyword::where('keyword', $kw['keyword'])->first();
-                if ($kwExists) {
-                    unset($keywords[$key]);
-                }
-                
-                /**
-                 * Additional fields
-                 */
-                $kw['industry_id'] = $industry;
-                $kw['created_at'] = date('Y-m-d H:i:s');
-            }
-        }
-        
-        DB::table('keywords')->insert($keywords, $thisCrapId);
-
-        echo count($keywords);
+        $this->insert_keywords($keywords_arr, $industry, $thisCrapId);
     }
-    private function insert_keywords($keyword_arr, $crap_id) {
-        $keywords = [];
-        
+
+    private function insert_keywords($keyword_arr, $industry, $crap_id, $parent_keyword_id = 0) {        
         foreach($keyword_arr as $kw) {
-            $keywords[] = [
+            $keyword = [
                 "level" => $kw['level'],
                 "keyword" => $kw['name'],
                 "crap_id" => $crap_id,
-                "admin_accepted" => 0
+                "admin_accepted" => 0,
+                'parent_keyword_id' => $parent_keyword_id,
+                'industry_id' => $industry,
+                'created_at' => date('Y-m-d H:i:s')
             ];
 
-            // Recursive add children
-            if (!empty($kw['children'])) {
-                $keywords = array_merge($keywords, $this->insert_keywords($kw['children'], $crap_id));
+            /** Check for duplicates */
+            $kwExists = Keyword::where('keyword', $kw['name'])->first();
+            if (!$kwExists) {
+                /** If no duplicate */
+                $kwId = DB::table('keywords')->insertGetId($keyword);
+
+                // Recursive add children
+                if (!empty($kw['children'])) {
+                    $this->insert_keywords($kw['children'], $industry, $crap_id, $kwId);
+                }
             }
         }
-
-        return $keywords;
     }
 
     // GLOBAL KEYWORD FUNCTION 
