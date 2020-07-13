@@ -25,9 +25,7 @@ class KeywordCrapperController extends Controller {
 
     public function update(Request $request, $id){
         $keyword = Keyword::findORFail($id);
-
         $input = $request->all();
-
         $keyword->fill($input)->save();
     }
 
@@ -44,7 +42,9 @@ class KeywordCrapperController extends Controller {
     public function custom(Request $request) {
         $keyword = $request->input('keyword');
         $level = $request->input('level');
-        $keyword_UTF8 = $keyword;
+
+        // $keyword_UTF8 = $keyword;
+
         $symbols = $request->input('symbols');
         $industry = $request->input('industry');
 
@@ -69,15 +69,25 @@ class KeywordCrapperController extends Controller {
         $max_crap_id = DB::table('keywords')->max('crap_id');
         $thisCrapId = (int)$max_crap_id + 1;
         $keywords = $this->insert_keywords($keywords_arr, $thisCrapId);
-        if ($industry) {
-            foreach($keywords as &$kw) {
 
-                // TODO check and remove duplicates.
+        if ($industry) {
+            foreach($keywords as $key => &$kw) {
+                /**
+                 * Removing duplicates
+                 */
+                $kwExists = Keyword::where('keyword', $kw['keyword'])->first();
+                if ($kwExists) {
+                    unset($keywords[$key]);
+                }
                 
+                /**
+                 * Additional fields
+                 */
                 $kw['industry_id'] = $industry;
                 $kw['created_at'] = date('Y-m-d H:i:s');
             }
         }
+        
         DB::table('keywords')->insert($keywords, $thisCrapId);
 
         echo count($keywords);

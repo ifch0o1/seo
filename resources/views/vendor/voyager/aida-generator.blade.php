@@ -79,7 +79,7 @@
                                             </td>
                                             <td class="border px-4 py-2">@{{kw.keyword}}</td>
                                             <td class="border px-4 py-2">@{{kw.money_rank}}</td>
-                                            <td class="border px-4 py-2">@{{kw.used}} times</td>
+                                            <td class="border px-4 py-2">@{{kw.used || '0'}} times</td>
                                         </tr>
                                     </tbody>
                                 </table>

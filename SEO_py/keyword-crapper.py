@@ -28,10 +28,13 @@ else:
 # Server connection
 if str(sys.argv).count('local') > 0:
     driver = webdriver.Chrome('/var/www/html/seo/SEO_py/chromedriver')  # Optional argument, if not specified will search path.
+    apiUrl = 'http://79.124.39.68/api/push_python_words'
 else:
     driver = webdriver.Remote(
         command_executor='http://127.0.0.1:4444/wd/hub', 
         desired_capabilities=DesiredCapabilities.CHROME)
+    apiUrl = 'http://seo.maxprogress.bg/api/push_python_words'
+    
 driver.get('http://www.google.com/')
 
 # Elements
@@ -96,7 +99,7 @@ def process_keyword_with_symbols(keyword, level = 1):
 
 result = process_keyword_with_symbols(base_keyword)
 
-r = requests.post('http://seo.maxprogress.bg/api/push_python_words',
+r = requests.post(apiUrl,
                     # data=json.dumps({'keywords_json': result})
                     json={'keywords_json': result, 'industry': industry},
                     headers={'Content-Type': 'application/json; charset=utf-8'})
