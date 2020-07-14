@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-
 Route::get('/', function () {
     return view('welcome');
 });
@@ -28,8 +27,6 @@ Route::get('admin/aida-generator', "AidaGeneratorController")
 
 Route::post('api/aida_posts/generate', "AidaGeneratorController@generate")
     ->middleware('auth');
-
-Route::post('api/custom_python_test', 'KeywordCrapperController@custom');
 
 Route::resource('api/keywords', "KeywordCrapperController");
 

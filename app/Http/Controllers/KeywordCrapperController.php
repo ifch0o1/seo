@@ -48,8 +48,13 @@ class KeywordCrapperController extends Controller {
         $symbols = $request->input('symbols');
         $industry = $request->input('industry');
 
+        $print_command_instead_of_executing_it = FALSE;
+        $server_ip = $_SERVER['SERVER_ADDR'];
+
+        echo "export PYTHONIOENCODING=utf-8 && /usr/bin/python3 /var/www/html/seo/SEO_py/keyword-crapper.py '$keyword' $level '$symbols' '$industry' '$server_ip' local 2>&1 <br>";
+
         # Executing selenium
-        exec("export PYTHONIOENCODING=utf-8 && /usr/bin/python3 /var/www/html/seo/SEO_py/keyword-crapper.py '$keyword' $level '$symbols' '$industry' 2>&1", $output);
+        exec("export PYTHONIOENCODING=utf-8 && /usr/bin/python3 /var/www/html/seo/SEO_py/keyword-crapper.py '$keyword' $level '$symbols' '$industry' '$server_ip' 2>&1", $output);
         echo "<pre>";
         print_r($output);
         echo "</pre>";
@@ -58,12 +63,18 @@ class KeywordCrapperController extends Controller {
     public function push_python_words(Request $request) {
         $this->level = 0;
 
+        print_r($request->all());
+
         // Laravel gives me array instead of json.
         $keywords_arr = $request->keywords_json;
+
+        var_dump($keywords_arr);
+
         $industry = $request->industry;
 
         if (!$keywords_arr || empty($keywords_arr)) {
             print_r("___NO_DATA_EXCEPTION___");
+            return;
         }
 
         $max_crap_id = DB::table('keywords')->max('crap_id');

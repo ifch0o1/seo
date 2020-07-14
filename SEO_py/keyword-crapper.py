@@ -28,6 +28,8 @@ if sys.argv[4]:
 else:
     industry = ''
 
+server_ip = str(sys.argv[5])
+
 # Server connection
 if str(sys.argv).count('local') > 0:
     driver = webdriver.Chrome('/var/www/html/seo/SEO_py/chromedriver')  # Optional argument, if not specified will search path.
@@ -37,7 +39,11 @@ else:
         command_executor='http://127.0.0.1:4444/wd/hub', 
         desired_capabilities=DesiredCapabilities.CHROME)
     apiUrl = 'http://seo.maxprogress.bg/api/push_python_words'
-    
+
+if (server_ip.count('192.168') > 0):
+    apiUrl = 'http://79.124.39.68/api/push_python_words'
+
+
 driver.get('http://www.google.com/')
 
 # Elements
