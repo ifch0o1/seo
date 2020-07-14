@@ -40,9 +40,9 @@ else:
         desired_capabilities=DesiredCapabilities.CHROME)
     apiUrl = 'http://seo.maxprogress.bg/api/push_python_words'
 
+# If localhost website API used - Change the apiUrl to save in local database.
 if (server_ip.count('192.168') > 0):
     apiUrl = 'http://79.124.39.68/api/push_python_words'
-
 
 driver.get('http://www.google.com/')
 

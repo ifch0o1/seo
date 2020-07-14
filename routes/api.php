@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/custom_python_test', 'KeywordCrapperController@custom')->middleware('cors');
 
+Route::resource('/client', 'API\ClientController');
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

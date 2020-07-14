@@ -39,9 +39,16 @@
         <div class="row">
             <div class="col-md-3">
                 <span>Industry filter</span>
-                <select2 :options="industries" v-model="industry" @input="industryFilter">
+                <select2-ajax name="industry_filter" :options="industries" :value="industry" @input="industryFilter">
                     <option value="">All</option>
-                </select2>
+                </select2-ajax>
+            </div>
+
+            <div class="col-md-3">
+                <span>Client filter</span>
+                <select2-ajax name="client_filter" :options="clients" :value="client" @input="clientFilter">
+                    <option value="">All</option>
+                </select2-ajax>
             </div>
         </div>
     </div>
@@ -480,11 +487,15 @@
     @include('libs.vue')
 
     <script>
+        let urlClient = getParams(window.location.href).client
+
         let filtersVue = new Vue({
             el: "#filtersVue",
             data: {
                 industries: [],
-                industry: '{{ $search->value }}' || ''
+                industry: '{{ $search->value }}' || '',
+                clients: [],
+                client: +urlClient || ""
             },
             methods: {
                 industryFilter(val) {
@@ -493,12 +504,28 @@
                     } else {
                         window.location.search = ``
                     }
+                },
+                clientFilter(val) {
+                    let clientObj = this.clients.find(client => client.id == val);
+
+                    if (val && clientObj.industry_id) {
+                        window.location.search = `?key=industry_id&filter=equals&s=${clientObj.industry_id}&client=${clientObj.id}`
+                    } else {
+                        window.location.search = `?client=${val}`
+                    }
                 }
             },
             mounted() {
                 $.get('/api/industry')
                     .done((res) => {
-                        this.industries = res.map((val) => ({id: val.id, text: val.name}));
+                        this.industries = [{id: '', text: "All"}]
+                            .concat(res.map((val) => ( {id: val.id, text: val.name} )));
+                    })
+                
+                $.get('/api/client')
+                    .done((res) => {
+                        this.clients = [{id: '', text: "All"}]
+                            .concat(res.map((val) => ( {id: val.id, text: val.name, industry_id: val.industry_id} )));
                     })
             }
         })

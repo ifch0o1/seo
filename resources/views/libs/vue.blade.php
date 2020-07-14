@@ -19,8 +19,8 @@
 
 <script>
     Vue.config.devtools = true;
-    
-    Vue.component("select2", {
+
+    Vue.component("select2-ajax", {
         props: ["options", "value"],
         template: "#select2-template",
         mounted: function () {
@@ -42,7 +42,7 @@
             },
             options: function (options) {
                 // update options
-                $(this.$el).empty().select2({ data: options });
+                $(this.$el).empty().select2({ data: options }).val(this.value).trigger('change.select2');
             },
         },
         destroyed: function () {
