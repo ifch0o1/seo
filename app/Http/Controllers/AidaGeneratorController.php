@@ -40,6 +40,9 @@ class AidaGeneratorController extends Controller
 
         $savedPosts = [];
 
+        /** $used_sentences prevent duplicates of sentences. */
+        $used_sentences = [];
+
         foreach($keywords as $kwId) {
             $kw = Keyword::find($kwId);
             $kw->used++;
@@ -47,20 +50,67 @@ class AidaGeneratorController extends Controller
 
             $post = '';
             foreach($tags as $tagId) {
+
+                /** Check if has sentence with this industry (NOT USED IN THIS GENERATION) */
                 $sentence = AidaSentence::where('tag_id', $tagId)
+                    ->where('admin_accepted', '1')
+                    ->where('industry_id', $industry)
+                    ->whereNotIn('id', $used_sentences)
                     ->inRandomOrder()
                     ->limit(1)
                     ->first();
 
+                /** 
+                 * If no sentences from this industry - take only sentences WITHOUT industry (NULL)
+                 * voyager set NULL even on removed exsisting industries from EDIT screen 
+                 */
+                if (!$sentence) {
+                    $sentence = AidaSentence::where('tag_id', $tagId)
+                        ->where('admin_accepted', '1')
+                        ->whereNull('industry_id')
+                        ->whereNotIn('id', $used_sentences)
+                        ->inRandomOrder()
+                        ->limit(1)
+                        ->first();
+                }
+
+                /** Save this sentence for prevent duplicates. */
+                $used_sentences[] = $sentence->id;
+
+                /** Increase the sentence `used` column */
                 $sentence->used++;
                 $sentence->save();
                 
+                /** Additional processing... */
                 $sentenceText = $this->clearSentence($sentence['text']);
                 $sentenceText = str_replace('{k}', '<b>"'.$kw['keyword'].'"</b>', $sentenceText);
 
+                if ($industry) {
+                    $industryName = Industry::find($industry)->name;
+                    $sentenceText = str_replace('{industry}', '<b>'.$industryName.'</b>', $sentenceText);
+                }
+
+                if ($client) {
+                    $clientModel = Client::find($client);
+                    /** Set default firm name */
+                    $firm_name = $clientModel->name;
+
+                    /** But if we have specificialy firm name variations, we get one random of it. */
+                    $firm_name_variations = $clientModel->firm_name_variations;
+                    if ($firm_name_variations) {
+                        $firm_names = array_filter(explode(",", $firm_name_variations));
+                        $firm_name = $firm_names[array_rand($firm_names)];
+                        $firm_name = trim($firm_name);
+                    }
+
+                    $sentenceText = str_replace('{firm}', '<b>'.$firm_name.'</b>', $sentenceText);
+                }
+
+                /** Add the sentence in Post text. */
                 $post .= $sentenceText;
             }
 
+            /** Create AIDA post. */
             $aidaPost = new AidaPost();
             $aidaPost->text = $post;
             $aidaPost->industry_id = $industry;
@@ -73,6 +123,7 @@ class AidaGeneratorController extends Controller
 
             $aidaPost->save();
 
+            /** Record saved post (used to return RESPONSE to UI) */
             $savedPosts[] = $aidaPost;
         }
 

@@ -95,7 +95,7 @@ class KeywordCrapperController extends Controller {
             ];
 
             /** Check for duplicates */
-            $kwExists = Keyword::where('keyword', $kw['name'])->first();
+            $kwExists = Keyword::where('keyword', $kw['name'])->exists();
             if (!$kwExists) {
                 /** If no duplicate */
                 $kwId = DB::table('keywords')->insertGetId($keyword);
