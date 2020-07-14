@@ -93,9 +93,9 @@ def process_keyword_with_symbols(keyword, level = 1):
     keyword_object = {}
     
     for c in symbols:
-        time.sleep(0.2)
+        time.sleep(0.4)
         search_box.send_keys(c)
-        time.sleep(0.5)
+        time.sleep(0.9)
 
         suggestions = get_suggestions(keyword)
         # recursion for.
