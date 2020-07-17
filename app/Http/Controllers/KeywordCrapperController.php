@@ -14,7 +14,6 @@ class KeywordCrapperController extends Controller {
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    private $level = null;
 
     public function __invoke(Request $request){
         $industries = Industry::all();
@@ -61,14 +60,8 @@ class KeywordCrapperController extends Controller {
     }
 
     public function push_python_words(Request $request) {
-        $this->level = 0;
-
-        print_r($request->all());
-
         // Laravel gives me array instead of json.
         $keywords_arr = $request->keywords_json;
-
-        var_dump($keywords_arr);
 
         $industry = $request->industry;
 
@@ -116,11 +109,23 @@ class KeywordCrapperController extends Controller {
      */
     public function get_api_handler(Request $request) {
         $keywordsQB = Keyword::where("admin_accepted", '1');
+        
+        $word_ranking_only_client_id = $request->word_ranking_only_client_id; // not used yet.
 
         $industry = $request->input('industry_id');
         if ($industry) {
-            $keywordsQB->where('industry_id', $industry);
+            $keywordsQB
+                ->where('industry_id', $industry);
+
+                // not used yet.
+                if ($word_ranking_only_client_id) {
+                    // not used yet.
+                    $keywordsQB
+                        ->leftJoin('keyword_ranking__clinet_href_keywords', 'id', '=', 'keyword_ranking__clinet_href_keywords.keyword_id')
+                        ->where('client_id', $word_ranking_only_client_id);
+                }
         }
+
         return $keywordsQB->get();
     }
 }

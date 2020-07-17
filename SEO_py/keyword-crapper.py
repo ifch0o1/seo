@@ -41,6 +41,7 @@ else:
     apiUrl = 'http://seo.maxprogress.bg/api/push_python_words'
 
 # If localhost website API used - Change the apiUrl to save in local database.
+print(server_ip) # ?????
 if (server_ip.count('192.168') > 0):
     apiUrl = 'http://79.124.39.68/api/push_python_words'
 
@@ -110,17 +111,17 @@ def process_keyword_with_symbols(keyword, level = 1):
     return keyword_object
 
 result = process_keyword_with_symbols(base_keyword)
-result = [{'level': 0, 'name': base_keyword, 'children': result}]
+result = [{'level': 0, 'name': base_keyword.encode('utf-8', 'surrogateescape').decode('utf-8'), 'children': result}]
 
 r = requests.post(apiUrl,
-                    # data=json.dumps({'keywords_json': result})
                     json={'keywords_json': result, 'industry': industry},
+                    # json={'keywords_json': result, 'industry': industry},
                     headers={'Content-Type': 'application/json; charset=utf-8'})
 
 print("Sending request to php... The response is:")
 
 print(r.text)
 
-print(json.dumps(result))
+print(json.dumps(json.dumps({'keywords_json': result, 'industry': industry})))
 
 driver.quit()

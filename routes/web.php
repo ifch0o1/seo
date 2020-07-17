@@ -25,15 +25,15 @@ Route::get('admin/keyword-crapper', "KeywordCrapperController")
 Route::get('admin/aida-generator', "AidaGeneratorController")
     ->middleware('auth');
 
+Route::get('admin/keyword-ranking', "KeywordRankingController")
+    ->middleware('auth');
+
 Route::post('api/aida_posts/generate', "AidaGeneratorController@generate")
     ->middleware('auth');
 
 Route::resource('api/keywords', "KeywordCrapperController");
 
 Route::resource('api/aida_posts', "AidaPostsController");
-
-Route::apiResource('api/industry', "API\IndustryController")
-    ->middleware('auth');
 
 Route::post('api/push_python_words', 'KeywordCrapperController@push_python_words');
 

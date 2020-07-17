@@ -102,7 +102,7 @@
                     this.loading = true;
                     this.ready = false;
 
-                    $.post('http://79.124.39.68/api/custom_python_test', {
+                    $.post('/api/custom_python_test', {
                         "keyword": this.keyword.replace(/\s+/g, '_').toLowerCase(),
                         "level": this.level,
                         "symbols": this.symbols,
@@ -121,7 +121,15 @@
                                 footer: 'Test it your self to catch the problem.'
                             })
 
-                        } else {
+                        } else if (res.indexOf('___INVALID_JSON___') !== -1) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Server error.',
+                                text: 'Server error occured',
+                                footer: 'The pipe connection broken'
+                            })
+                        }
+                        else {
                             this.keyword = '';
                         }
 
