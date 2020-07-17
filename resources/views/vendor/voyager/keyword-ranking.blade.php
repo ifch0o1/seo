@@ -89,8 +89,37 @@
                         </div>
 
                         <div class="row" v-if="view == 'ranking'">
-                            <div class="col-md-8">
-                                RANKING
+                            <div class="col-md-12">
+                                <table class="table-auto text-lg font-semibold w-full" v-if="rankings.length && !loadingRankings">
+                                    <thead class="select-none">
+                                        <tr class="bg-gray-200">
+                                            <th class="px-4 py-2 cursor-pointer">Keyword </th>
+                                            <th class="px-4 py-2 cursor-pointer">Rank.</th>
+                                            <th class="px-4 py-2 cursor-pointer">Change</th>
+                                            <th class="px-4 py-2 cursor-pointer">Link</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="r in rankings">
+                                            <td class="border px-4 py-2">@{{r.keyword}}</td>
+                                            <td class="border px-4 py-2">@{{r.position}}</td>
+                                            <td class="border px-4 py-2">
+                                                <div style="align-items: center">
+                                                    @{{r.change || 'N/A'}}
+                                                    <i class="text-4xl align-middle"
+                                                    :class="{
+                                                            'voyager-double-up text-green-600': r.change_type == 'raise' && r.change > 1,
+                                                            'voyager-double-down text-red-600': r.change_type == 'fall' && r.change > 1,
+                                                            'voyager-angle-up text-green-600': r.change_type == 'raise' && r.change == 1,
+                                                            'voyager-angle-down text-red-600': r.change_type == 'fall' && r.change == 1
+                                                        }
+                                                    "></i>
+                                                </div>
+                                            </td>
+                                            <td class="border px-4 py-2">@{{r.link}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -130,8 +159,10 @@
                 currentSort:'money_rank',
                 currentSortDir:'desc',
                 loadingKw: false,
-                view: 'settings',
-                industryName: ''
+                view: 'ranking',
+                industryName: '',
+                rankings: [],
+                loadingRankings: false
             },
             methods: {
                 industryChange(val) {
@@ -159,9 +190,11 @@
                     });
                 },
                 clientChange(val) {
+                    /** 
+                     * Loading keyword hrefs 
+                     */
                     $.get(`/api/client/${val}`).done(client => {
                         if (client && client.industry_id) {
-
                             /** 
                              * Call the industry change
                              * 
@@ -172,11 +205,18 @@
                             $.get(`/api/industry/${client.industry_id}`).done(industry => {
                                 this.industryName = industry.name;
                             })
-
                         } else {
                             Swal.fire("This client has no attached industry.");
                         }
                     });
+
+                    /** 
+                     * Loading ranking data
+                     */
+                    $.get(`/api/client_keywords_ranking/${val}`).done(rankings => {
+                        rankings.forEach(val => {val.link = decodeURIComponent(val.link)})
+                        this.rankings = rankings
+                    })
                 },
                 toggleTag(id) {
                     let selectedTagsArr = this.selectedTags.split(',')

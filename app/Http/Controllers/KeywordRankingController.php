@@ -31,20 +31,59 @@ class KeywordRankingController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function indexRanking(Client $client)
     {
-        return Client::all();
+        $hrefs = $this->indexClientKeywordHref($client);
+        $data = [];
+
+        if ($hrefs) {
+            foreach($hrefs as $href) {
+                $rankingData = DB::table('keyword_rankings as kr')
+                    ->select('kr.*', 'kw.keyword', 'kw.money_rank')
+                    ->where('keyword_id', $href->keyword_id)
+                    ->orderByDesc('kr.created_at')
+                    ->leftJoin('keywords as kw', 'kr.keyword_id', '=', 'kw.id')
+                    ->limit(2)
+                    ->get();
+
+                // Only 1 record -> cannot calculate rank change
+                if ($rankingData->count() == 1) {
+                    $data[] = $rankingData->first();
+                } else if ($rankingData->count() == 2) {
+                    $new = $rankingData->first();
+                    $last = $rankingData->last();
+
+                    if ($new->position > $last->position) {
+                        /** Rised up */
+                        $new->change_type = 'raise';
+                        $new->change = $new->position - $last->position;
+                    } else if ($new->position < $last->position) {
+                        /** Falled down */
+                        $new->change_type = 'fall';
+                        $new->change = $last->position - $new->position;
+                    } else {
+                        /** Equals */
+                        $new->change_type = 'none';
+                        $new->change = 0;
+                    }
+
+                    $data[] = $new;
+                }
+            }
+        }
+
+        return $data;
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store ranking data (from selenium)
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-        //TODO
+        KeywordRanking::insert($request->all());
     }
 
     public function indexClientKeywordHref(Client $client) {
@@ -73,5 +112,12 @@ class KeywordRankingController extends Controller
                 ->where('keyword_id', $keyword_id)
                 ->delete();
         }
+    }
+
+    public function keywordRankingWords() {
+        return DB::table('keyword_ranking__clinet_href_keywords as href')
+            ->leftJoin('clients', 'href.client_id', '=', 'clients.id')
+            ->leftJoin('keywords', 'href.keyword_id', '=', 'keywords.id')
+            ->get();
     }
 }

@@ -47,8 +47,7 @@ class KeywordCrapperController extends Controller {
         $symbols = $request->input('symbols');
         $industry = $request->input('industry');
 
-        $print_command_instead_of_executing_it = FALSE;
-        $server_ip = $_SERVER['SERVER_ADDR'];
+        $server_ip = $request->ip();
 
         echo "export PYTHONIOENCODING=utf-8 && /usr/bin/python3 /var/www/html/seo/SEO_py/keyword-crapper.py '$keyword' $level '$symbols' '$industry' '$server_ip' local 2>&1 <br>";
 

@@ -16,11 +16,19 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/custom_python_test', 'KeywordCrapperController@custom')->middleware('cors');
 
+
 Route::resource('/client', 'API\ClientController');
 
 Route::apiResource('/industry', "API\IndustryController");
 
+
+Route::get('/keyword-ranking-words', 'KeywordRankingController@keywordRankingWords')->middleware('cors');
+
+Route::post('/keyword-ranking-words', 'KeywordRankingController@store')->middleware('cors');
+
 Route::get('/client_keyword_href/{client}', "KeywordRankingController@indexClientKeywordHref");
+
+Route::get('/client_keywords_ranking/{client}', 'KeywordRankingController@indexRanking');
 
 Route::post('/client_keyword_href', "KeywordRankingController@storeClientKeywordHref");
 

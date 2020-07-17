@@ -10,72 +10,135 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import json
 import requests
+from urllib.parse import urlparse
 
-keyword = 'Уеб дизайн'
-page_turns = 50
-site = 'maxprogress.bg'
+def get_domain(url):
+    return urlparse(url)
 
-# if str(sys.argv).count('local') > 0:
-driver = webdriver.Chrome('/var/www/html/seo/SEO_py/chromedriver')  # Optional argument, if not specified will search path.
-    # apiUrl = 'http://79.124.39.68/api/push_python_words'
-# else:
-#     driver = webdriver.Remote(
-#         command_executor='http://127.0.0.1:4444/wd/hub', 
-#         desired_capabilities=DesiredCapabilities.CHROME)
-#     apiUrl = 'http://seo.maxprogress.bg/api/push_python_words'
+cron = str(sys.argv).count('cron') > 0
+cron = True
 
-# server_ip = str(sys.argv[5])
-# If localhost website API used - Change the apiUrl to save in local database.
-# if (server_ip.count('192.168') > 0):
-    # apiUrl = 'http://79.124.39.68/api/push_python_words'
+if cron:
+    apiUrl = 'https://seo.maxprogress.bg/api/keyword-ranking-words'
+    driver = webdriver.Remote(
+        command_executor='http://127.0.0.1:4444/wd/hub', 
+        desired_capabilities=DesiredCapabilities.CHROME)
+else:
+    apiUrl = 'http://79.124.36.172/api/keyword-ranking-words'
+    driver = webdriver.Chrome('/var/www/html/seo/SEO_py/chromedriver')  # Optional argument, if not specified will search path.
+
+page_turns = 3
 
 driver.get('http://www.google.com/')
-time.sleep(0.3)
+time.sleep(0.5)
 
-search_box = driver.find_element_by_name('q')
-search_box.send_keys(keyword)
-search_box.submit()
+def find_position(keyword, site):
+    site = get_domain(site).netloc
+    if site == '':
+        return False
+
+    search_box = WebDriverWait(driver, 5).until(
+        EC.presence_of_element_located((By.NAME, "q"))
+    )
+
+    search_box.clear()
+    search_box.send_keys(keyword)
+    search_box.submit()
+
+    link_results = [] # not used for now.
+
+    x = range(page_turns)
+    current_site_index = False
+    for n in x:
+        print('searching page', n)
+        link_list = get_results()
+        link_results += link_list
+
+        for index, l in enumerate(link_results):
+            if l.count(site) > 0:
+                current_site_index = index
+                break
+        
+        if current_site_index:
+            break
+        else:
+            # Clicking next_page() - if next page return false - no next page button exists (no more pages available)
+            if next_page() == False:
+                return False
+
+    if current_site_index != False:
+        return {'position': current_site_index + 1, 'url': link_results[current_site_index]}
+    else:
+        return False
 
 def next_page():
-    driver.find_element_by_xpath("//*[@id='pnnext']").click()
-    time.sleep(0.3)
+    try:
+        next_page_link = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.XPATH, "//*[@id='pnnext']"))
+        )
+        next_page_link.click()
+        time.sleep(3)
+        return True
+    except:
+        print('next page error')
+        return False
 
 def previous_page():
-    driver.find_element_by_xpath("//*[@id='pnprev']").click()
-    time.sleep(0.3)
+    try:
+        prev_page_link = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.XPATH, "//*[@id='pnprev']"))
+        )
+        prev_page_link.click()
+        time.sleep(3)
+        return True
+    except:
+        print('prev page error')
+        return False
 
 def get_current_page():
-    current_page = driver.find_elements_by_xpath("//*[@id='foot']//td/span/..")[0].text
-    return current_page
+    try:
+        current_page = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.XPATH, "//*[@id='foot']//td/span/.."))
+        )
+        return current_page.text
+    except:
+        print('current page error')
+        return False
 
 def get_results():
-    links = driver.find_elements_by_xpath('//*[@id="search"]//*[@class="g"]//h3/../../a')
+    results_xpath = '//*[@id="search"]//*[@class="g"]//h3/../../a'
+
+    links = WebDriverWait(driver, 5).until(
+        EC.presence_of_all_elements_located((By.XPATH, results_xpath))
+    )
+
     results = []
     for link in links:
         href = link.get_attribute('href')
-        print(href)
+        # print(href)
         results.append(href)
     
     return results
 
-link_results = []
+r = requests.get(apiUrl)
 
-x = range(page_turns)
-current_site_index = None
-for n in x:
-    link_list = get_results()
-    link_results += link_list
+data = json.loads(r.text)
 
-    for index, l in enumerate(link_results):
-        if l.count(site) > 0:
-            current_site_index = index
-            break
-    
-    if current_site_index:
-        break
-    next_page()
+print(data)
 
-print(current_site_index + 1)
-print(link_results)
+for href_data in data:
+    posData = find_position(href_data['keyword'], href_data['site'])
+    if posData:
+        position = posData['position']
+        url = posData['url']
+
+        store_r = requests.post(apiUrl, json={
+            'keyword_id': href_data['keyword_id'],
+            'client_id': href_data['client_id'],
+            'position': position,
+            'link': url
+        })
+
+        print(store_r.status_code)
 
 driver.quit()
