@@ -66,3 +66,7 @@ i.table-text-icon {
   /* MAZNA SHITNQ */
   width: 100% !important;
 }
+
+.swal-wide{
+  width:80% !important;
+}

@@ -224,7 +224,7 @@
                                                         <div row-text-content>{{ $data->{$row->field} }}</div>
     
                                                         {{-- IVO CUSTOM EDIT TEXT FIELD --}}
-                                                        {{-- @if(property_exists($row->details, 'textEditable')) --}}
+                                                        @if(property_exists($row->details, 'textEditable'))
                                                             <span class="hover-icon-1 inline-block">
                                                                 <i 
                                                                 row-field="{{ $row->field }}" 
@@ -236,7 +236,7 @@
                                                                 class="voyager-pen table-text-icon" 
                                                                 title="Inline edit"></i>
                                                             </span>
-                                                        {{-- @endif --}}
+                                                        @endif
                                                     </div>
 
                                                     {{-- IVO CUSTOM EDIT TEXT FIELD END --}}

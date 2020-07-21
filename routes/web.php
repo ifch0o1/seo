@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+Route::group(['prefix' => 'admin'], function () {
+    Voyager::routes();
+});
 
 Route::get('/', function () {
     return redirect('/admin');
@@ -38,7 +40,3 @@ Route::resource('api/aida_posts', "AidaPostsController");
 Route::post('api/push_python_words', 'KeywordCrapperController@push_python_words');
 
 Route::get('api/keywords', 'KeywordCrapperController@get_api_handler');
-
-Route::group(['prefix' => 'admin'], function () {
-    Voyager::routes();
-});

@@ -99,6 +99,7 @@ function text_updateRow(el) {
             id: 'swal_kw_input'
         },
         showCancelButton: true,
+        customClass: "swal-wide",
         confirmButtonText: "Save",
         showLoaderOnConfirm: true,
         preConfirm: (keyword) => {
