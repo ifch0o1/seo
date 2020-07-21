@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AidaSentence extends Model
 {
-    protected $fillable = array('*');
+    protected $fillable = array('admin_accepted');
     
     public function save(array $options = [])
     {

@@ -50,6 +50,15 @@
                     <option value="">All</option>
                 </select2-ajax>
             </div>
+
+            <div class="col-md-3">
+                <span>Approved</span>
+                <select name="approved" :value="approved" id="approved" class="form-control" @change="approvedFilter($event)">
+                    <option value="">All</option>
+                    <option value="1">Only Approved</option>
+                    <option value="0">Only Not approved</option>
+                </select>
+            </div>
         </div>
     </div>
 @stop
@@ -514,7 +523,8 @@
                 industries: [],
                 industry: '{{ $search->value }}' || '',
                 clients: [],
-                client: +urlClient || ""
+                client: +urlClient || "",
+                approved: '{{ $approved ?? '' }}'
             },
             methods: {
                 industryFilter(val) {
@@ -532,6 +542,12 @@
                     } else {
                         window.location.search = `?client=${val}`
                     }
+                },
+                approvedFilter(ev) {
+                    let url = new URL(window.location.href)
+                    let searchParams = url.searchParams
+                    searchParams.set('approved', ev.target.value)
+                    window.location.search = searchParams.toString()
                 }
             },
             mounted() {

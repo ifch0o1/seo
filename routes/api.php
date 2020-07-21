@@ -21,6 +21,7 @@ Route::resource('/client', 'API\ClientController');
 
 Route::apiResource('/industry', "API\IndustryController");
 
+Route::apiResource('/aida_sentences', "API\AidaSentenceController");
 
 Route::get('/keyword-ranking-words', 'KeywordRankingController@keywordRankingWords')->middleware('cors');
 
