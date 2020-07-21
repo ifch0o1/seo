@@ -76,6 +76,7 @@ class AidaSentencesController extends \TCG\Voyager\Http\Controllers\VoyagerBaseC
                 $query = $model::select('*');
             }
 
+            /** Custom filter for approved / not aproved */
             $approved = $request->get('approved');
             if ($approved === '0' || $approved === '1') {
                 $query->where(function($q) use ($approved) {

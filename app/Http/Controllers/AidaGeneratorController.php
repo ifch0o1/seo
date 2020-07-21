@@ -51,7 +51,6 @@ class AidaGeneratorController extends Controller
 
             $post = '';
             foreach($tags as $tagId) {
-
                 /** 50/50 Change to get industry sentence */
                 $change = mt_rand(0,1);
                 if ($change) {
@@ -63,6 +62,8 @@ class AidaGeneratorController extends Controller
                         ->inRandomOrder()
                         ->limit(1)
                         ->first();
+                } else {
+                    $sentence = false;
                 }
 
                 /** 
@@ -77,6 +78,11 @@ class AidaGeneratorController extends Controller
                         ->inRandomOrder()
                         ->limit(1)
                         ->first();
+                }
+
+                if (!$sentence) {
+                    /** ??? Or remove admin accepted ??? */
+                    continue;
                 }
 
                 /** Save this sentence for prevent duplicates. */
