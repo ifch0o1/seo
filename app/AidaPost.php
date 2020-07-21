@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class AidaPost extends Model
 {
     protected $primaryKey = "id";
-    protected $fillable = ['approved'];
+    protected $fillable = ['approved', 'text'];
 }

@@ -91,7 +91,7 @@ function text_updateRow(el) {
     let $el = $(el);
 
     Swal.fire({
-        title: `Editing keyword #${attrs.id}`,
+        title: `Editing ${attrs.model} #${attrs.id}`,
         input: "textarea",
         inputValue: attrs.value,
         inputAttributes: {

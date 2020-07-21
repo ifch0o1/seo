@@ -34,6 +34,24 @@
         @endforeach
         @include('voyager::multilingual.language-selector')
     </div>
+
+    <div class="container-fluid" id="filtersVue">
+        <div class="row">
+            <div class="col-md-3">
+                <span>Industry filter</span>
+                <select2-ajax name="industry_filter" :options="industries" :value="industry" @input="industryFilter">
+                    <option value="">All</option>
+                </select2-ajax>
+            </div>
+
+            <div class="col-md-3">
+                <span>Client filter</span>
+                <select2-ajax name="client_filter" :options="clients" :value="client" @input="clientFilter">
+                    <option value="">All</option>
+                </select2-ajax>
+            </div>
+        </div>
+    </div>
 @stop
 
 @section('content')
@@ -157,7 +175,35 @@
 
                                                 @elseif(($row->type == 'select_dropdown' || $row->type == 'radio_btn') && property_exists($row->details, 'options'))
 
-                                                    {!! $row->details->options->{$data->{$row->field}} ?? '' !!}
+                                                
+
+                                                    @if($row->type == 'select_dropdown')
+                                                        {{-- IVO SELECT DROPDOWN --}}
+                                                        <select 
+                                                        onchange="select_dropdown_updateRow(this)" 
+
+                                                        row-field="{{ $row->field }}" 
+                                                        row-model="{{$dataType->name}}"
+                                                        row-id="{{ $data->getKey() }}"
+
+                                                        class="form-control"
+                                                        >
+                                                            <option value="">Choose</option>
+                                                            @foreach($row->details->options as $key => $value)
+                                                                <option 
+                                                                value="{{$key}}"
+                                                                @if($data->{$row->field} && $key == $row->details->options->{$data->{$row->field}})
+                                                                    selected
+                                                                @endif
+                                                                >
+                                                                    {{$value}}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    {{-- END IVO SELECT DROPDOWN --}}
+                                                    @else
+                                                        {!! $row->details->options->{$data->{$row->field}} ?? '' !!}
+                                                    @endif
 
                                                 @elseif($row->type == 'date' || $row->type == 'timestamp')
                                                     @if ( property_exists($row->details, 'format') && !is_null($data->{$row->field}) )
@@ -166,6 +212,7 @@
                                                         {{ $data->{$row->field} }}
                                                     @endif
                                                 @elseif($row->type == 'checkbox')
+
                                                     {{-- IVO CUSTOM CHECKBOX 
                                                         (controlled in custom.js) 
                                                     --}}
@@ -199,11 +246,54 @@
                                                 @elseif($row->type == 'color')
                                                     <span class="badge badge-lg" style="background-color: {{ $data->{$row->field} }}">{{ $data->{$row->field} }}</span>
                                                 @elseif($row->type == 'text')
+
                                                     @include('voyager::multilingual.input-hidden-bread-browse')
-                                                    <div>{{ mb_strlen( $data->{$row->field} ) > 200 ? mb_substr($data->{$row->field}, 0, 200) . ' ...' : $data->{$row->field} }}</div>
+                                                    <div row-text-content-parent>
+                                                        <span row-text-content>
+                                                            {{ $data->{$row->field} }}
+                                                        </span>
+                                                        
+                                                        {{-- IVO CUSTOM EDIT TEXT FIELD --}}
+
+                                                        {{-- @if(property_exists($row->details, 'textEditable')) --}}
+                                                            <span class="hover-icon-1 inline-block">
+                                                                <i 
+                                                                row-field="{{ $row->field }}" 
+                                                                row-model="{{$dataType->name}}"
+                                                                row-id="{{ $data->getKey() }}"
+    
+                                                                onclick="text_updateRow(this)" 
+    
+                                                                class="voyager-pen table-text-icon" 
+                                                                title="Inline edit"></i>
+                                                            </span>
+                                                        {{-- @endif --}}
+
+                                                        {{-- IVO CUSTOM EDIT TEXT FIELD END --}}
+                                                    </div>
+
                                                 @elseif($row->type == 'text_area')
                                                     @include('voyager::multilingual.input-hidden-bread-browse')
-                                                    <div>{{ mb_strlen( $data->{$row->field} ) > 200 ? mb_substr($data->{$row->field}, 0, 200) . ' ...' : $data->{$row->field} }}</div>
+                                                    <div>{{ $data->{$row->field} }}</div>
+
+                                                    {{-- IVO CUSTOM EDIT TEXT FIELD --}}
+
+                                                    @if(property_exists($row->details, 'textEditable'))
+                                                        <span class="hover-icon-1 inline-block">
+                                                            <i 
+                                                            row-field="{{ $row->field }}" 
+                                                            row-model="{{$dataType->name}}"
+                                                            row-id="{{ $data->getKey() }}"
+
+                                                            onclick="text_updateRow(this)" 
+
+                                                            class="voyager-pen table-text-icon" 
+                                                            title="Inline edit"></i>
+                                                        </span>
+                                                    @endif
+
+                                                    {{-- IVO CUSTOM EDIT TEXT FIELD END --}}
+                                                    
                                                 @elseif($row->type == 'file' && !empty($data->{$row->field}) )
                                                     @include('voyager::multilingual.input-hidden-bread-browse')
                                                     @if(json_decode($data->{$row->field}) !== null)
@@ -220,26 +310,7 @@
                                                     @endif
                                                 @elseif($row->type == 'rich_text_box')
                                                     @include('voyager::multilingual.input-hidden-bread-browse')
-                                                    <div row-text-content-parent>
-                                                        <div row-text-content>{{ $data->{$row->field} }}</div>
-    
-                                                        {{-- IVO CUSTOM EDIT TEXT FIELD --}}
-                                                        {{-- @if(property_exists($row->details, 'textEditable')) --}}
-                                                            <span class="hover-icon-1 inline-block">
-                                                                <i 
-                                                                row-field="{{ $row->field }}" 
-                                                                row-model="{{$dataType->name}}"
-                                                                row-id="{{ $data->getKey() }}"
-    
-                                                                onclick="text_updateRow(this)" 
-    
-                                                                class="voyager-pen table-text-icon" 
-                                                                title="Inline edit"></i>
-                                                            </span>
-                                                        {{-- @endif --}}
-                                                    </div>
-
-                                                    {{-- IVO CUSTOM EDIT TEXT FIELD END --}}
+                                                    <div>{{ mb_strlen( strip_tags($data->{$row->field}, '<b><i><u>') ) > 200 ? mb_substr(strip_tags($data->{$row->field}, '<b><i><u>'), 0, 200) . ' ...' : strip_tags($data->{$row->field}, '<b><i><u>') }}</div>
                                                 @elseif($row->type == 'coordinates')
                                                     @include('voyager::partials.coordinates-static-image')
                                                 @elseif($row->type == 'multiple_images')
@@ -427,5 +498,55 @@
             });
             $('.selected_ids').val(ids);
         });
+    </script>
+
+
+    {{-- IVO SCRIPTS --}}
+
+    @include('libs.vue')
+
+    <script>
+        let urlClient = getParams(window.location.href).client
+
+        let filtersVue = new Vue({
+            el: "#filtersVue",
+            data: {
+                industries: [],
+                industry: '{{ $search->value }}' || '',
+                clients: [],
+                client: +urlClient || ""
+            },
+            methods: {
+                industryFilter(val) {
+                    if (val) {
+                        window.location.search = `?key=industry_id&filter=equals&s=${val}`
+                    } else {
+                        window.location.search = ``
+                    }
+                },
+                clientFilter(val) {
+                    let clientObj = this.clients.find(client => client.id == val);
+
+                    if (val && clientObj.industry_id) {
+                        window.location.search = `?key=industry_id&filter=equals&s=${clientObj.industry_id}&client=${clientObj.id}`
+                    } else {
+                        window.location.search = `?client=${val}`
+                    }
+                }
+            },
+            mounted() {
+                $.get('/api/industry')
+                    .done((res) => {
+                        this.industries = [{id: '', text: "All"}]
+                            .concat(res.map((val) => ( {id: val.id, text: val.name} )));
+                    })
+                
+                $.get('/api/client')
+                    .done((res) => {
+                        this.clients = [{id: '', text: "All"}]
+                            .concat(res.map((val) => ( {id: val.id, text: val.name, industry_id: val.industry_id} )));
+                    })
+            }
+        })
     </script>
 @stop

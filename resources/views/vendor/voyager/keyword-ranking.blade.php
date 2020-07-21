@@ -48,6 +48,12 @@
                                         <i class="voyager-settings"></i>
                                         Select Words for Ranking
                                 </button>
+
+                                {{-- <button class="btn rounded-full" 
+                                @click="updateRanking">
+                                        <i class="voyager-refresh"></i>
+                                    Update Ranking
+                                </button> --}}
                             </div>
                         </div>
 
@@ -94,9 +100,10 @@
                                     <thead class="select-none">
                                         <tr class="bg-gray-200">
                                             <th class="px-4 py-2 cursor-pointer">Keyword </th>
-                                            <th class="px-4 py-2 cursor-pointer">Rank.</th>
+                                            <th class="px-4 py-2 cursor-pointer">Position.</th>
                                             <th class="px-4 py-2 cursor-pointer">Change</th>
                                             <th class="px-4 py-2 cursor-pointer">Link</th>
+                                            <th class="px-4 py-2 cursor-pointer">Date</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -117,6 +124,7 @@
                                                 </div>
                                             </td>
                                             <td class="border px-4 py-2">@{{r.link}}</td>
+                                            <td class="border px-4 py-2">@{{r.created_at}}</td>
                                         </tr>
                                     </tbody>
                                 </table>

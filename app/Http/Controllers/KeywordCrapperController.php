@@ -87,7 +87,7 @@ class KeywordCrapperController extends Controller {
             ];
 
             /** Check for duplicates */
-            $kwExists = Keyword::where('keyword', $kw['name'])->exists();
+            $kwExists = Keyword::where('keyword', $kw['name'])->first();
             if (!$kwExists) {
                 /** If no duplicate */
                 $kwId = DB::table('keywords')->insertGetId($keyword);
@@ -95,6 +95,10 @@ class KeywordCrapperController extends Controller {
                 // Recursive add children
                 if (!empty($kw['children'])) {
                     $this->insert_keywords($kw['children'], $industry, $crap_id, $kwId);
+                }
+            } else {
+                if (!empty($kw['children'])) {
+                    $this->insert_keywords($kw['children'], $industry, $crap_id, $kwExists['id']);
                 }
             }
         }

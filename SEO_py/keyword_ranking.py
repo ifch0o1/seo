@@ -8,29 +8,31 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.common.exceptions import TimeoutException
+import random
 import json
 import requests
 from urllib.parse import urlparse
+
 
 def get_domain(url):
     return urlparse(url)
 
 cron = str(sys.argv).count('cron') > 0
-cron = True
 
 if cron:
     apiUrl = 'https://seo.maxprogress.bg/api/keyword-ranking-words'
     driver = webdriver.Remote(
-        command_executor='http://127.0.0.1:4444/wd/hub', 
+        command_executor='http://127.0.0.1:4444/wd/hub',
         desired_capabilities=DesiredCapabilities.CHROME)
 else:
     apiUrl = 'http://79.124.36.172/api/keyword-ranking-words'
     driver = webdriver.Chrome('/var/www/html/seo/SEO_py/chromedriver')  # Optional argument, if not specified will search path.
 
-page_turns = 3
+page_turns = 6
 
 driver.get('http://www.google.com/')
-time.sleep(0.5)
+time.sleep(random.randint(5, 35))
 
 def find_position(keyword, site):
     site = get_domain(site).netloc
@@ -77,7 +79,7 @@ def next_page():
             EC.presence_of_element_located((By.XPATH, "//*[@id='pnnext']"))
         )
         next_page_link.click()
-        time.sleep(3)
+        time.sleep(random.randint(5, 35))
         return True
     except:
         print('next page error')
@@ -89,7 +91,7 @@ def previous_page():
             EC.presence_of_element_located((By.XPATH, "//*[@id='pnprev']"))
         )
         prev_page_link.click()
-        time.sleep(3)
+        time.sleep(random.randint(5, 35))
         return True
     except:
         print('prev page error')
@@ -108,9 +110,15 @@ def get_current_page():
 def get_results():
     results_xpath = '//*[@id="search"]//*[@class="g"]//h3/../../a'
 
-    links = WebDriverWait(driver, 5).until(
-        EC.presence_of_all_elements_located((By.XPATH, results_xpath))
-    )
+    try:
+        links = WebDriverWait(driver, 5).until(
+            EC.presence_of_all_elements_located((By.XPATH, results_xpath))
+        )
+    except:
+        # Wait ~60-80 minutes until google removed a captcha.
+        time.sleep(4500)
+        driver.get('http://www.google.com/')
+        return []
 
     results = []
     for link in links:
@@ -123,8 +131,6 @@ def get_results():
 r = requests.get(apiUrl)
 
 data = json.loads(r.text)
-
-print(data)
 
 for href_data in data:
     posData = find_position(href_data['keyword'], href_data['site'])
