@@ -43,6 +43,7 @@ class AidaGeneratorController extends Controller
         /** $used_sentences prevent duplicates of sentences. */
         $used_sentences = [];
 
+        /** Each keyword generates Post */
         foreach($keywords as $kwId) {
             $kw = Keyword::find($kwId);
             $kw->used++;
@@ -51,17 +52,21 @@ class AidaGeneratorController extends Controller
             $post = '';
             foreach($tags as $tagId) {
 
-                /** Check if has sentence with this industry (NOT USED IN THIS GENERATION) */
-                $sentence = AidaSentence::where('tag_id', $tagId)
-                    ->where('admin_accepted', '1')
-                    ->where('industry_id', $industry)
-                    ->whereNotIn('id', $used_sentences)
-                    ->inRandomOrder()
-                    ->limit(1)
-                    ->first();
+                /** 50/50 Change to get industry sentence */
+                $change = mt_rand(0,1);
+                if ($change) {
+                    /** Check if has sentence with this industry (NOT USED IN THIS GENERATION) */
+                    $sentence = AidaSentence::where('tag_id', $tagId)
+                        ->where('admin_accepted', '1')
+                        ->where('industry_id', $industry)
+                        ->whereNotIn('id', $used_sentences)
+                        ->inRandomOrder()
+                        ->limit(1)
+                        ->first();
+                }
 
                 /** 
-                 * If no sentences from this industry - take only sentences WITHOUT industry (NULL)
+                 * If no sentences from this industry (or 50/50 return 0) - take only sentences WITHOUT industry (NULL)
                  * voyager set NULL even on removed exsisting industries from EDIT screen 
                  */
                 if (!$sentence) {
