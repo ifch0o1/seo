@@ -13,6 +13,9 @@ import random
 import json
 import requests
 from urllib.parse import urlparse
+from datetime import datetime
+from selenium.webdriver.common.action_chains import ActionChains
+
 
 
 def get_domain(url):
@@ -24,15 +27,30 @@ if cron:
     apiUrl = 'https://seo.maxprogress.bg/api/keyword-ranking-words'
     driver = webdriver.Remote(
         command_executor='http://127.0.0.1:4444/wd/hub',
-        desired_capabilities=DesiredCapabilities.CHROME)
+        desired_capabilities=DesiredCapabilities.FIREFOX)
+
+    # Set sleeps
+    minSleep = 10
+    maxSleep = 35
 else:
     apiUrl = 'http://79.124.36.172/api/keyword-ranking-words'
-    driver = webdriver.Chrome('/var/www/html/seo/SEO_py/chromedriver')  # Optional argument, if not specified will search path.
+    # driver = webdriver.Chrome('/var/www/html/seo/SEO_py/chromedriver')  # Optional argument, if not specified will search path.
+    driver = webdriver.Firefox('/var/www/html/seo/SEO_py/')  # Optional argument, if not specified will search path.
 
-page_turns = 6
+    # Set sleeps
+    minSleep = 5
+    maxSleep = 25
+
+# 0 = 1
+page_turns = 1
+
+def random_sleep():
+    time.sleep(random.randint(minSleep, maxSleep))
+
+driver.maximize_window()
 
 driver.get('http://www.google.com/')
-time.sleep(random.randint(5, 35))
+random_sleep()
 
 def find_position(keyword, site):
     site = get_domain(site).netloc
@@ -78,11 +96,20 @@ def next_page():
         next_page_link = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.XPATH, "//*[@id='pnnext']"))
         )
+
+        #Scroll pagination
+        # actions = ActionChains(driver)
+        # actions.move_to_element(next_page_link).perform()
+
+        random_sleep()
+
         next_page_link.click()
-        time.sleep(random.randint(5, 35))
+
+        random_sleep()
         return True
-    except:
+    except Exception as e:
         print('next page error')
+        print(str(e))
         return False
 
 def previous_page():
@@ -90,11 +117,20 @@ def previous_page():
         prev_page_link = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.XPATH, "//*[@id='pnprev']"))
         )
+
+        #Scroll pagination
+        # actions = ActionChains(driver)
+        # actions.move_to_element(prev_page_link).perform()
+        
+        random_sleep()
+
         prev_page_link.click()
-        time.sleep(random.randint(5, 35))
+
+        random_sleep()
         return True
-    except:
+    except Exception as e:
         print('prev page error')
+        print(str(e))
         return False
 
 def get_current_page():
@@ -116,14 +152,19 @@ def get_results():
         )
     except:
         # Wait ~60-80 minutes until google removed a captcha.
-        time.sleep(4500)
-        driver.get('http://www.google.com/')
+        # time.sleep(4500)
+        # driver.get('http://www.google.com/')
+        print("May be captcha hitted.")
         return []
 
     results = []
     for link in links:
-        href = link.get_attribute('href')
-        # print(href)
+        try:
+            href = link.get_attribute('href')
+        except Exception as e:
+            print(str(e))
+            return []
+        
         results.append(href)
     
     return results

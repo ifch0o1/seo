@@ -118,6 +118,7 @@ class KeywordRankingController extends Controller
         return DB::table('keyword_ranking__clinet_href_keywords as href')
             ->leftJoin('clients', 'href.client_id', '=', 'clients.id')
             ->leftJoin('keywords', 'href.keyword_id', '=', 'keywords.id')
+            ->inRandomOrder()
             ->get();
     }
 }

@@ -176,7 +176,7 @@
                                                         @if($data->{$row->field})
                                                             checked
                                                         @endif
-                                                        row-field="{{ $row->field }}" 
+                                                        row-field="{{ $row->field }}"
                                                         row-model="{{$dataType->name}}"
                                                         row-id="{{ $data->getKey() }}"
                                                         value="{{ $data->getKey() }}"
