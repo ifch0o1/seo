@@ -179,6 +179,7 @@
                                                         row-field="{{ $row->field }}" 
                                                         row-model="{{$dataType->name}}"
                                                         row-id="{{ $data->getKey() }}"
+                                                        value="{{ $data->getKey() }}"
                                                     >
 
                                                     {{-- END IVO CUSTOM CHECKBOX --}}
