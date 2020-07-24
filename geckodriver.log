@@ -16,3 +16,4 @@ JavaScript error: resource://gre/modules/URIFixup.jsm, line 281: NS_ERROR_FAILUR
 1595598648550	Marionette	INFO	Listening on port 43215
 1595598648614	Marionette	WARN	TLS certificate errors will be ignored for this session
 JavaScript error: resource://gre/modules/URIFixup.jsm, line 281: NS_ERROR_FAILURE: Should pass a non-null uri
+1595600621663	Marionette	INFO	Stopped listening on port 43215

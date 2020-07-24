@@ -155,6 +155,9 @@ class KeywordCrapperController extends Controller {
 
     public function getBottomKeywords($keywordId) {
         $keyword = Keyword::find($keywordId);
+        $keyword->searched_for_bottom_suggestions = 1;
+        $keyword->save();
+        
         $urlEncodedKeyword = urlencode($keyword->keyword);
 
         $output = file_get_contents(env('SELENIUM_SERVER_ADDRESS') . "/api/crap_bottom_keywords/$urlEncodedKeyword");

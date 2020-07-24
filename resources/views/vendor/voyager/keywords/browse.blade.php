@@ -277,6 +277,9 @@
                                                         @if($row->field == 'keyword')
                                                             <span class="hover-icon-1 inline-block" @click="findBottomSuggestions('{{ $data->getKey() }}', '{{ $data->{$row->field} }}')">
                                                                 <i class="voyager-search table-text-icon" 
+                                                                @if($data->searched_for_bottom_suggestions == 1)
+                                                                    style="color: white; background: red; padding: 5px;"
+                                                                @endif
                                                                 title="Get bottom suggestions"></i>
                                                             </span>
                                                         @endif
@@ -376,7 +379,7 @@
                                         </div>
                                         <div class="modal-body">
                                             <p>List of bottom suggestions from google:</p>
-                                            
+
                                             <ul v-if="!loadingBottomSuggestions">
                                                 <li v-for="kw in keywords">
                                                     <input :id="'sug_approval_' + kw.id" type="checkbox" v-model="keywordsSelectedForApproval" :value="kw.id">

@@ -45,7 +45,6 @@ try:
 
     driver.quit()
 except Exception as e:
-    bottom_sugs.append('error')
-    bottom_sugs.append(str(e))
+    driver.quit()
 
 print(json.dumps(bottom_sugs))
