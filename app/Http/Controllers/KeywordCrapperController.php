@@ -134,8 +134,8 @@ class KeywordCrapperController extends Controller {
         return $keywordsQB->get();
     }
 
-    /** V2 thinking... */
-    public function getBottomKeywords($keywordId) {
+    /** LOCAL SERVER ONLY */
+    public function crapBottomKeywords($keyword) {
         /** 
          * Set BG LOCALE IS IMPORTANT!
          * This allows PHP to send cyrillic symbols to exec($COMMAND)
@@ -144,13 +144,22 @@ class KeywordCrapperController extends Controller {
         setlocale(LC_ALL,$locale);
         putenv('LC_ALL='.$locale);
 
-        $keyword = Keyword::find($keywordId);
-        $keywordStr = str_replace(" ", "_", $keyword->keyword);
+        $keyword = str_replace(" ", "_", $keyword);
 
         # Executing selenium
-        exec("/usr/bin/python3 /var/www/html/seo/SEO_py/bottom_suggestions.py '$keywordStr' 2>&1", $output);
+        exec("/usr/bin/python3 /var/www/html/seo/SEO_py/bottom_suggestions.py '$keyword' 2>&1", $output);
 
+        echo json_encode($output);
+        die;
+    }
 
+    public function getBottomKeywords($keywordId) {
+        $keyword = Keyword::find($keywordId);
+        $urlEncodedKeyword = urlencode($keyword->keyword);
+
+        $output = file_get_contents(env('SELENIUM_SERVER_ADDRESS') . "/api/crap_bottom_keywords/$urlEncodedKeyword");
+        $output = json_decode($output);
+        
         if ($output && is_array($output)) {
             $suggestions_arr = null;
 

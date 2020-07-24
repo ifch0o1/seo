@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/custom_python_test', 'KeywordCrapperController@custom')->middleware('cors');
 
-Route::any('/get_bottom_keywords/{keyword}', 'KeywordCrapperController@getBottomKeywords')->middleware('cors');
+Route::get('/get_bottom_keywords/{keyword}', 'KeywordCrapperController@getBottomKeywords');
+
+Route::get('/crap_bottom_keywords/{keyword}', 'KeywordCrapperController@crapBottomKeywords')->middleware('cors');
 
 Route::resource('/client', 'API\ClientController');
 
