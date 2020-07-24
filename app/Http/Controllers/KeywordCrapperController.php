@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Keyword;
 use App\Industry;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class KeywordCrapperController extends Controller {
@@ -40,6 +41,7 @@ class KeywordCrapperController extends Controller {
      */
     public function custom(Request $request) {
         $keyword = $request->input('keyword');
+        $keyword = str_replace(" ", "_", $keyword);
         $level = $request->input('level');
 
         // $keyword_UTF8 = $keyword;
@@ -130,5 +132,69 @@ class KeywordCrapperController extends Controller {
         }
 
         return $keywordsQB->get();
+    }
+
+    /** V2 thinking... */
+    public function getBottomKeywords($keywordId) {
+        /** 
+         * Set BG LOCALE IS IMPORTANT!
+         * This allows PHP to send cyrillic symbols to exec($COMMAND)
+         */
+        $locale='bg_BG.UTF-8';
+        setlocale(LC_ALL,$locale);
+        putenv('LC_ALL='.$locale);
+
+        $keyword = Keyword::find($keywordId);
+        $keywordStr = str_replace(" ", "_", $keyword->keyword);
+
+        # Executing selenium
+        exec("/usr/bin/python3 /var/www/html/seo/SEO_py/bottom_suggestions.py '$keywordStr' 2>&1", $output);
+
+
+        if ($output && is_array($output)) {
+            $suggestions_arr = null;
+
+            foreach ($output as $line) {
+                $suggestions_arr = json_decode($line);
+                if ($suggestions_arr) {
+                    break;
+                }
+            }
+        }
+
+        /**
+         * Used to save ids of all new recorded keywords.
+         */
+        $record_ids = [];
+
+        if ($suggestions_arr) {
+            /**
+             * Filter the words that exsisting in the DB.
+             */
+            foreach ($suggestions_arr as $k => $suggestedKeyword) {
+                /**
+                 * Check if keyword exists
+                 */
+                if (Keyword::whereRaw("LOWER(keyword) = '".strtolower($suggestedKeyword)."'")->withTrashed()->exists()) {
+                    /** If exists in our database - we unset it to remove duplicates. */
+                    unset($suggestions_arr[$k]);
+                } else {
+                    /** Else we insert the keyword and save it's id. */
+                    $record_ids[] = Keyword::insertGetId([
+                        'keyword' => $suggestedKeyword,
+                        'industry_id' => $keyword->industry_id,
+                        'admin_accepted' => 0,
+                        'parent_keyword_id' => $keyword->id,
+                        'level' => ($keyword->level ?? 0) + 1,
+                    ]);
+                }
+            }
+        }
+
+        /**
+         * Get all new saved keywords data to return it to the UI.
+         */
+        $newRecords = Keyword::whereIn('id', $record_ids)->get();
+        return($newRecords);
     }
 }

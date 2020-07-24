@@ -92,7 +92,7 @@
                                 @endif
                             </form>
                         @endif
-                        <div class="table-responsive">
+                        <div class="table-responsive" id="vueDataTable">
                             <table id="dataTable" class="table table-hover">
                                 <thead>
                                     <tr>
@@ -271,6 +271,17 @@
                                                         @endif
 
                                                         {{-- IVO CUSTOM EDIT TEXT FIELD END --}}
+
+                                                        {{-- CUSTOM FOR KEYWORDS SCREEN ONLY --}}
+
+                                                        @if($row->field == 'keyword')
+                                                            <span class="hover-icon-1 inline-block" @click="findBottomSuggestions('{{ $data->getKey() }}', '{{ $data->{$row->field} }}')">
+                                                                <i class="voyager-search table-text-icon" 
+                                                                title="Get bottom suggestions"></i>
+                                                            </span>
+                                                        @endif
+
+                                                        {{-- END CUSTOM FOR KEYWORDS SCREEN ONLY --}}
                                                     </div>
 
                                                 @elseif($row->type == 'text_area')
@@ -354,6 +365,38 @@
                                     @endforeach
                                 </tbody>
                             </table>
+
+                            <div class="modal fade" tabindex="-1" role="dialog" id="bottom_suggestions_modal">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                                    aria-hidden="true">&times;</span></button>
+                                            <h4 class="modal-title">Keywords for approval</h4>
+                                        </div>
+                                        <div class="modal-body">
+
+                                            <ul v-if="!loadingBottomSuggestions">
+                                                <li v-for="kw in keywords">
+                                                    <input :id="'sug_approval_' + kw.id" type="checkbox" v-model="keywordsSelectedForApproval" :value="kw.id">
+                                                    <label :for="'sug_approval_' + kw.id" class="font-bold">@{{ kw.keyword }}</label>
+                                                </li>
+                                            </ul>
+
+                                            <div class="" v-else class="text-center">
+                                                <span>
+                                                    <x-preloader></x-preloader>
+                                                </span>
+                                            </div>
+
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-primary" @click="approveSelectedKeywords">Save changes</button>
+                                        </div>
+                                    </div><!-- /.modal-content -->
+                                </div><!-- /.modal-dialog -->
+                            </div><!-- /.modal -->
                         </div>
                         @if ($isServerSide)
                             <div class="pull-left">
@@ -528,6 +571,42 @@
                         this.clients = [{id: '', text: "All"}]
                             .concat(res.map((val) => ( {id: val.id, text: val.name, industry_id: val.industry_id} )));
                     })
+            }
+        })
+
+        let tableVue = new Vue({
+            el: '#vueDataTable',
+            data: {
+                keywords: [],
+                keywordsSelectedForApproval: [],
+                loadingBottomSuggestions: false
+            },
+            methods: {
+                findBottomSuggestions(id, keyword) {
+                    this.openBottomSuggestionsModal();
+                    this.loadingBottomSuggestions = true;
+                    $.ajax({method: "GET", url: `{{ env('SELENIUM_SERVER_ADDRESS') }}/api/get_bottom_keywords/${id}`})
+                        .done(res => {
+                            if (res) {
+                                this.keywords = res;
+                            }
+                        })
+                        .always(() => {this.loadingBottomSuggestions = false});
+                },
+                openBottomSuggestionsModal() {
+                    $('#bottom_suggestions_modal').modal('show');
+                },
+                closeBottomSuggestionsModal() {
+                    $('#bottom_suggestions_modal').modal('hide');
+                },
+                approveSelectedKeywords() {
+                    for (kwId of this.keywordsSelectedForApproval) {
+                        $.ajax({method: "PUT", url: `/api/keywords/${kwId}`, data: {
+                            "admin_accepted": 1
+                        }});
+                        this.closeBottomSuggestionsModal();
+                    }
+                }
             }
         })
     </script>

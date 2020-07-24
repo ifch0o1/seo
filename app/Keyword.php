@@ -13,6 +13,8 @@ class Keyword extends Model {
         'admin_accepted'
     ];
 
+    public $timestamps = true;
+
     use SoftDeletes;
     protected $dates = ['deleted_at'];
 }
