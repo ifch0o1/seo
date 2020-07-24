@@ -375,7 +375,8 @@
                                             <h4 class="modal-title">Keywords for approval</h4>
                                         </div>
                                         <div class="modal-body">
-
+                                            <p>List of bottom suggestions from google:</p>
+                                            
                                             <ul v-if="!loadingBottomSuggestions">
                                                 <li v-for="kw in keywords">
                                                     <input :id="'sug_approval_' + kw.id" type="checkbox" v-model="keywordsSelectedForApproval" :value="kw.id">

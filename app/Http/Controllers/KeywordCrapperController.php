@@ -165,7 +165,7 @@ class KeywordCrapperController extends Controller {
 
             foreach ($output as $line) {
                 $suggestions_arr = json_decode($line);
-                if ($suggestions_arr) {
+                if ($suggestions_arr && !in_array('error', $suggestions_arr)) {
                     break;
                 }
             }

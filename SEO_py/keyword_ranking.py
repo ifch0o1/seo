@@ -34,7 +34,8 @@ if cron:
     minSleep = 40
     maxSleep = 120
 else:
-    apiUrl = 'http://79.124.36.172/api/keyword-ranking-words'
+    # apiUrl = 'http://79.124.36.172/api/keyword-ranking-words'
+    apiUrl = 'https://seo.maxprogress.bg/api/keyword-ranking-words'
     # driver = webdriver.Chrome('/var/www/html/seo/SEO_py/chromedriver')  # Optional argument, if not specified will search path.
     driver = webdriver.Firefox('/var/www/html/seo/SEO_py/')  # Optional argument, if not specified will search path.
 
@@ -175,9 +176,8 @@ r = requests.get(apiUrl)
 data = json.loads(r.text)
 
 for href_data in data:
-    if (href_data['site'] != 'https://bsiservice.eu/'):
-        continue
-    
+    print(href_data['site'])
+
     posData = find_position(href_data['keyword'], href_data['site'])
     if posData:
         position = posData['position']

@@ -14,4 +14,4 @@ yarn-error.log
 .htaccess
 *.idea
 .vscode
-*geckodriver.log
+*/geckodriver.log
