@@ -585,7 +585,7 @@
                 findBottomSuggestions(id, keyword) {
                     this.openBottomSuggestionsModal();
                     this.loadingBottomSuggestions = true;
-                    $.ajax({method: "GET", url: `{{ env('SELENIUM_SERVER_ADDRESS') }}/api/get_bottom_keywords/${id}`})
+                    $.ajax({method: "GET", url: `/api/get_bottom_keywords/${id}`})
                         .done(res => {
                             if (res) {
                                 this.keywords = res;
