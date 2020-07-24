@@ -39,7 +39,7 @@
                             </div>
                         </div>
 
-                        <div class="row">
+                        <div class="row position-sticky" style="top:0">
                             <div class="col-md-8">
 
                                 <div class="w-full text-center" v-if="loadingKw || loadingPosts">
@@ -87,6 +87,45 @@
                             </div>
 
                             <div class="col-md-4">
+
+                                <div class="bg-gray-300 p-3 mt-4">
+                                    <h4 class="mt-4 text-xl">Available Image Folders:</h4>
+                                    <p class="my-2 inline-block underline" style="width: 33%" v-for="folder in folders">@{{folder}}</p>
+                                </div>
+
+                                <div class="mt-5">
+                                    <h3 class="my-4 text-xl font-bold">Image Properties:</h3>
+                                    <div class="form-group">
+                                        <label>Render Custom text in Image</label>
+                                        <textarea 
+                                            v-model="customImageText"
+                                            type="text"
+                                            class="form-control resize-none block w-full"
+                                            placeholder="Custom text"
+                                            rows="2">
+                                        </textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Custom Style</label>
+                                        <textarea 
+                                            v-model="customImageCss" type="text" class="form-control resize-none block w-full" rows="2">
+                                        </textarea>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-lg-6">
+                                            <label>Crop Horizontal (1-10)</label>
+                                            <input type="number" class="form-control" min="1" max="10" v-model="cropImageY">
+                                        </div>
+
+                                        <div class="form-group col-lg-6">
+                                            <label>Crop Vertical (1-10)</label>
+                                            <input type="number" class="form-control" min="1" max="10" v-model="cropImageX">
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="w-full">
                                     <div class="presubmit-active-radios w-full select-none">
                                         <div class="radio">
@@ -105,7 +144,7 @@
                                     </div>
                                 </div>
                                 <div class="w-full">
-                                    <span class="btn btn-success" @click="start">Generate</span>
+                                    <span class="btn btn-success w-100" @click="start">Generate</span>
                                 </div>
                             </div>
                         </div>
@@ -121,9 +160,9 @@
     @include('libs.vue')
     
     <script>
-        var industries = JSON.parse(`{!! json_encode($industries) !!}`);
-        var clients = JSON.parse(`{!! json_encode($clients) !!}`);
-        var tags = JSON.parse(`{!! json_encode($tags) !!}`);
+        var industries = {!! json_encode($industries) ?? [] !!};
+        var clients = {!! json_encode($clients) ?? [] !!};
+        var tags = {!! json_encode($tags) ?? [] !!};
 
         var select2_industries = industries.map((val) => ({id: val.id, text: val.name}))
 
@@ -145,7 +184,7 @@
                 client_id: '',
                 clients: select2_clients,
                 tags: tags,
-                selectedTags: "1,2,3,4",
+                selectedTags: "img-office,1,2,3,4",
                 keywords: [],
                 selectedKeywords: {},
                 currentSort:'money_rank',
@@ -153,7 +192,12 @@
                 loadingKw: false,
                 savedPosts: [],
                 generate_activated: 0,
-                loadingPosts: false
+                loadingPosts: false,
+                folders: {!! json_encode($folders) ?? [] !!},
+                customImageText: '',
+                customImageCss: 'max-width: 100%; max-height: 100%;',
+                cropImageY: "4",
+                cropImageX: "1"
             },
             methods: {
                 start() {
@@ -171,12 +215,18 @@
                         client: this.client_id,
                         tagIds,
                         selectedKeywordIds,
-                        generate_activated: this.generate_activated
+                        generate_activated: this.generate_activated,
+                        customImageText: this.customImageText,
+                        customImageCss: this.customImageCss,
+                        cropImageY: this.cropImageY,
+                        cropImageX: this.cropImageX,
                     }).done(savedPosts => {
                         this.loadingPosts = false;
                         if (savedPosts && savedPosts.length) {
                             this.savedPosts = savedPosts;
                         }
+                    }).fail(err => {
+                        
                     });
                 },
                 validate() {

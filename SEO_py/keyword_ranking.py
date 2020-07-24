@@ -15,6 +15,7 @@ import requests
 from urllib.parse import urlparse
 from datetime import datetime
 from selenium.webdriver.common.action_chains import ActionChains
+import re
 
 
 
@@ -30,8 +31,8 @@ if cron:
         desired_capabilities=DesiredCapabilities.FIREFOX)
 
     # Set sleeps
-    minSleep = 10
-    maxSleep = 35
+    minSleep = 40
+    maxSleep = 120
 else:
     apiUrl = 'http://79.124.36.172/api/keyword-ranking-words'
     # driver = webdriver.Chrome('/var/www/html/seo/SEO_py/chromedriver')  # Optional argument, if not specified will search path.
@@ -75,7 +76,7 @@ def find_position(keyword, site):
         link_results += link_list
 
         for index, l in enumerate(link_results):
-            if l.count(site) > 0:
+            if l.lower().count(site.lower()) > 0:
                 current_site_index = index
                 break
         
@@ -174,6 +175,9 @@ r = requests.get(apiUrl)
 data = json.loads(r.text)
 
 for href_data in data:
+    if (href_data['site'] != 'https://bsiservice.eu/'):
+        continue
+    
     posData = find_position(href_data['keyword'], href_data['site'])
     if posData:
         position = posData['position']

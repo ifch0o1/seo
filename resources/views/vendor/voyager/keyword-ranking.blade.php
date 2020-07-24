@@ -112,7 +112,7 @@
                                             <td class="border px-4 py-2">@{{r.position}}</td>
                                             <td class="border px-4 py-2">
                                                 <div style="align-items: center">
-                                                    @{{r.change || 'N/A'}}
+                                                    @{{r.change || '--'}}
                                                     <i class="text-4xl align-middle"
                                                     :class="{
                                                             'voyager-double-up text-green-600': r.change_type == 'raise' && r.change > 1,

@@ -34,6 +34,33 @@
         @endforeach
         @include('voyager::multilingual.language-selector')
     </div>
+
+    <div class="container-fluid" id="filtersVue">
+        <div class="row">
+            <div class="col-md-3">
+                <span>Industry filter</span>
+                <select2-ajax name="industry_filter" :options="industries" :value="industry" @input="industryFilter">
+                    <option value="">All</option>
+                </select2-ajax>
+            </div>
+
+            <div class="col-md-3">
+                <span>Client filter</span>
+                <select2-ajax name="client_filter" :options="clients" :value="client" @input="clientFilter">
+                    <option value="">All</option>
+                </select2-ajax>
+            </div>
+
+            <div class="col-md-3">
+                <span>Approved</span>
+                <select name="approved" :value="approved" id="approved" class="form-control" @change="approvedFilter($event)">
+                    <option value="">All</option>
+                    <option value="1">Only Approved</option>
+                    <option value="0">Only Not approved</option>
+                </select>
+            </div>
+        </div>
+    </div>
 @stop
 
 @section('content')
@@ -428,5 +455,61 @@
             });
             $('.selected_ids').val(ids);
         });
+    </script>
+
+    {{-- IVO SCRIPTS --}}
+
+    @include('libs.vue')
+
+    <script>
+        let urlClient = getParams(window.location.href).client
+
+        let filtersVue = new Vue({
+            el: "#filtersVue",
+            data: {
+                industries: [],
+                industry: '{{ $search->value }}' || '',
+                clients: [],
+                client: +urlClient || "",
+                approved: '{{ $approved ?? '' }}'
+            },
+            methods: {
+                industryFilter(val) {
+                    if (val) {
+                        window.location.search = `?key=industry_id&filter=equals&s=${val}`
+                    } else {
+                        window.location.search = ``
+                    }
+                },
+                clientFilter(val) {
+                    let clientObj = this.clients.find(client => client.id == val);
+
+                    if (val && clientObj.industry_id) {
+                        window.location.search = `?key=industry_id&filter=equals&s=${clientObj.industry_id}&client=${clientObj.id}`
+                    } else {
+                        window.location.search = `?client=${val}`
+                    }
+                },
+                approvedFilter(ev) {
+                    let url = new URL(window.location.href)
+                    let searchParams = url.searchParams
+                    searchParams.set('approved', ev.target.value)
+                    window.location.search = searchParams.toString()
+                }
+            },
+            mounted() {
+                $.get('/api/industry')
+                    .done((res) => {
+                        this.industries = [{id: '', text: "All"}]
+                            .concat(res.map((val) => ( {id: val.id, text: val.name} )));
+                    })
+                
+                $.get('/api/client')
+                    .done((res) => {
+                        this.clients = [{id: '', text: "All"}]
+                            .concat(res.map((val) => ( {id: val.id, text: val.name, industry_id: val.industry_id} )));
+                    })
+            }
+        })
     </script>
 @stop

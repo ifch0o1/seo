@@ -1,0 +1,14 @@
+1595420934984	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofileiUtRHc"
+1595420938703	Marionette	INFO	Listening on port 45963
+1595420938800	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: resource://gre/modules/URIFixup.jsm, line 281: NS_ERROR_FAILURE: Should pass a non-null uri
+1595420950597	Marionette	INFO	Stopped listening on port 45963
+1595487792580	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofile3X1dm8"
+1595487797535	Marionette	INFO	Listening on port 39603
+1595487797649	Marionette	WARN	TLS certificate errors will be ignored for this session
+1595487823315	Marionette	INFO	Stopped listening on port 39603
+1595487883581	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofileH2T2Lm"
+1595487887313	Marionette	INFO	Listening on port 32847
+1595487887408	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: resource://gre/modules/URIFixup.jsm, line 281: NS_ERROR_FAILURE: Should pass a non-null uri
+1595488111313	Marionette	INFO	Stopped listening on port 32847

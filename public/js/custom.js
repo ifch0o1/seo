@@ -160,6 +160,27 @@ function text_updateRow(el) {
 //     },
 // });
 
+/**
+ *  Error handling global
+ */
+$(document).ajaxError((event, err) => {
+    let errMessage = 'Unknown Error';
+    try {
+        err = JSON.parse(err.responseText)
+        errMessage = err.message || errMessage
+        errMessage += ` - [ FILE ]: ${err.file}`
+    } catch (e) {
+        errMessage = err.responseText || errMessage;
+    }
+    Swal.fire({
+        icon: 'error',
+        html: errMessage,
+        class: "swal-wide"
+    });
+    
+    this.loadingPosts = false;
+});
+
 /** Ready to start. */
 window.Pagination = {
     setPage(page) {

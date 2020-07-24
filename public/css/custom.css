@@ -67,6 +67,10 @@ i.table-text-icon {
   width: 100% !important;
 }
 
-.swal-wide{
+.swal-wide {
   width:80% !important;
+}
+
+.select2 {
+  border: 1px solid #c6ced1;
 }
