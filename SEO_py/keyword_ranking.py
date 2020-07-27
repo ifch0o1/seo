@@ -40,7 +40,7 @@ else:
     driver = webdriver.Firefox('/var/www/html/seo/SEO_py/')  # Optional argument, if not specified will search path.
 
     # Set sleeps
-    minSleep = 5
+    minSleep = 10
     maxSleep = 25
 
 # 0 = 1
@@ -77,8 +77,15 @@ def find_position(keyword, site):
         link_results += link_list
 
         for index, l in enumerate(link_results):
-            if l.lower().count(site.lower()) > 0:
+            linkLower = l.lower()
+            siteLower = site.lower()
+            print(linkLower)
+            print(siteLower)
+            print(linkLower.count(siteLower))
+
+            if linkLower.count(siteLower) > 0:
                 current_site_index = index
+                print(current_site_index)
                 break
         
         if current_site_index:
@@ -177,6 +184,7 @@ data = json.loads(r.text)
 
 for href_data in data:
     print(href_data['site'])
+    print(href_data['keyword'])
 
     posData = find_position(href_data['keyword'], href_data['site'])
     if posData:

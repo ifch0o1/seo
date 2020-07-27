@@ -92,7 +92,7 @@
                                 @endif
                             </form>
                         @endif
-                        <div class="table-responsive" id="vueDataTable">
+                        <div class="table-responsive" id="vue-">
                             <table id="dataTable" class="table table-hover">
                                 <thead>
                                     <tr>
@@ -259,13 +259,13 @@
                                                         @if(property_exists($row->details, 'textEditable'))
                                                             <span class="hover-icon-1 inline-block">
                                                                 <i 
-                                                                row-field="{{ $row->field }}" 
+                                                                row-field="{{ $row->field }}"
                                                                 row-model="{{$dataType->name}}"
                                                                 row-id="{{ $data->getKey() }}"
     
-                                                                onclick="text_updateRow(this)" 
+                                                                onclick="text_updateRow(this)"
     
-                                                                class="voyager-pen table-text-icon" 
+                                                                class="voyager-pen table-text-icon"
                                                                 title="Inline edit"></i>
                                                             </span>
                                                         @endif
@@ -579,7 +579,7 @@
         })
 
         let tableVue = new Vue({
-            el: '#vueDataTable',
+            el: '#vue-',
             data: {
                 keywords: [],
                 keywordsSelectedForApproval: [],
