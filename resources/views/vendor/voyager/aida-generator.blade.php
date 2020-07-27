@@ -77,7 +77,14 @@
                                             <td class="border px-4 py-2 select-none">
                                                 <input type="checkbox" :value="kw.id" class="custom-browse-checkbox" v-model="selectedKeywords[kw.id]">
                                             </td>
-                                            <td class="border px-4 py-2">@{{kw.keyword}}</td>
+                                            <td class="border px-4 py-2">@{{kw.keyword}}
+                                                <span class="hover-icon-1 inline-block">
+                                                    <i 
+                                                    @click="liveEditWord(kw)"
+                                                    class="voyager-pen table-text-icon"
+                                                    title="Inline edit"></i>
+                                                </span>
+                                            </td>
                                             <td class="border px-4 py-2">@{{kw.money_rank}}</td>
                                             <td class="border px-4 py-2">@{{kw.used || '0'}} times</td>
                                         </tr>
@@ -258,6 +265,45 @@
                     } else {
                         return true
                     }
+                },
+                liveEditWord(keywordObj) {
+                    Swal.fire({
+                    title: `Editing Keyword #${keywordObj.id}`,
+                    input: "textarea",
+                    inputValue: keywordObj.keyword,
+                    inputAttributes: {
+                        autocapitalize: "off",
+                        id: 'swal_kw_input'
+                    },
+                    showCancelButton: true,
+                    customClass: "swal-wide",
+                    confirmButtonText: "Save",
+                    showLoaderOnConfirm: true,
+                    preConfirm: (keyword) => {
+                        if (!keyword) alert("No keyword value");
+
+                        let data = {};
+                        data['keyword'] = keyword
+                        $.ajax({
+                            method: "PUT",
+                            url: `/api/keywords/${keywordObj.id}`,
+                            data
+                        })
+                        .done((res) => {
+                            keywordObj.keyword = keyword;
+                        })
+                        .fail((res) => {
+                            console.log('fail');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error occured',
+                                text: "Cannot save the keyword. Capture the network request for more info",
+                            })
+                        })
+                    },
+                    allowOutsideClick: () => !Swal.isLoading(),
+                })
+
                 },
                 industryChange(val) {
                     this.loadingKw = true;

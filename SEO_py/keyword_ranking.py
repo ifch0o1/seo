@@ -54,38 +54,47 @@ driver.maximize_window()
 driver.get('http://www.google.com/')
 random_sleep()
 
-def find_position(keyword, site):
-    site = get_domain(site).netloc
+def find_position(keyword, siteHref):
+    site = get_domain(siteHref).netloc
+    if site == '':
+        site = siteHref
+
     if site == '':
         return False
 
-    search_box = WebDriverWait(driver, 5).until(
+    search_box = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.NAME, "q"))
     )
 
-    search_box.clear()
-    search_box.send_keys(keyword)
-    search_box.submit()
+    # Sometimes this search filed changes.
+    # (may be google change it for security reasons)
+    try:
+        search_box.clear()
+        time.sleep(1)
+        search_box.send_keys(keyword)
+        time.sleep(1.5)
+        search_box.submit()
+    except Exception as ee:
+        print(str(ee))
+        print('entering recursion - search field raise an exception')
+        return find_position(keyword, siteHref)
 
-    link_results = [] # not used for now.
+    link_results = [] # not used for now
 
     x = range(page_turns)
     current_site_index = False
     for n in x:
-        print('searching page', n)
+        print('searching page', n + 1)
         link_list = get_results()
         link_results += link_list
 
         for index, l in enumerate(link_results):
             linkLower = l.lower()
             siteLower = site.lower()
-            print(linkLower)
-            print(siteLower)
-            print(linkLower.count(siteLower))
 
             if linkLower.count(siteLower) > 0:
                 current_site_index = index
-                print(current_site_index)
+                print('found at position: ', current_site_index)
                 break
         
         if current_site_index:
@@ -102,7 +111,7 @@ def find_position(keyword, site):
 
 def next_page():
     try:
-        next_page_link = WebDriverWait(driver, 5).until(
+        next_page_link = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, "//*[@id='pnnext']"))
         )
 
@@ -123,7 +132,7 @@ def next_page():
 
 def previous_page():
     try:
-        prev_page_link = WebDriverWait(driver, 5).until(
+        prev_page_link = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, "//*[@id='pnprev']"))
         )
 
@@ -144,7 +153,7 @@ def previous_page():
 
 def get_current_page():
     try:
-        current_page = WebDriverWait(driver, 5).until(
+        current_page = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, "//*[@id='foot']//td/span/.."))
         )
         return current_page.text
@@ -156,7 +165,7 @@ def get_results():
     results_xpath = '//*[@id="search"]//*[@class="g"]//h3/../../a'
 
     try:
-        links = WebDriverWait(driver, 5).until(
+        links = WebDriverWait(driver, 10).until(
             EC.presence_of_all_elements_located((By.XPATH, results_xpath))
         )
     except:
@@ -178,26 +187,37 @@ def get_results():
     
     return results
 
+
+
+# TEST
+# print(find_position("уеб дизайн", "www.maxprogress.bg"))
+# exit()
+# END TEST
+
 r = requests.get(apiUrl)
 
 data = json.loads(r.text)
 
 for href_data in data:
-    print(href_data['site'])
-    print(href_data['keyword'])
+    print('starting for site: ', href_data['site'])
+    print('searching for: ' , href_data['keyword'])
 
     posData = find_position(href_data['keyword'], href_data['site'])
     if posData:
         position = posData['position']
         url = posData['url']
+    else:
+        position = 0
+        url = '--'
 
-        store_r = requests.post(apiUrl, json={
-            'keyword_id': href_data['keyword_id'],
-            'client_id': href_data['client_id'],
-            'position': position,
-            'link': url
-        })
+    store_r = requests.post(apiUrl, json={
+        'keyword_id': href_data['keyword_id'],
+        'client_id': href_data['client_id'],
+        'position': position,
+        'link': url
+    })
 
-        print(store_r.status_code)
+    print('status: ', store_r.status_code)
+    print("====================================")
 
 driver.quit()

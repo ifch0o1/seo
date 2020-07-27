@@ -109,7 +109,7 @@
                                     <tbody>
                                         <tr v-for="r in rankings">
                                             <td class="border px-4 py-2">@{{r.keyword}}</td>
-                                            <td class="border px-4 py-2">@{{r.position}}</td>
+                                            <td class="border px-4 py-2">@{{r.position || '--'}}</td>
                                             <td class="border px-4 py-2">
                                                 <div style="align-items: center">
                                                     @{{r.change || '--'}}
@@ -146,10 +146,11 @@
         
         // var select2_industries = industries.map((val) => ({id: val.id, text: val.name}))
         
-        var clients = JSON.parse(`{!! json_encode($clients) !!}`);
+        var clients = {!! json_encode($clients) !!}
         var select2_clients = clients.map((val) => ({id: val.id, text: `${val.name} (${val.site})`}))
 
-        /**####################################################################################
+        /**
+         * ####################################################################################
          * #                                                                                  #
          * #                    VUE INSTANCE STARTING                                         #
          * #                                                                                  #
@@ -214,7 +215,7 @@
                                 this.industryName = industry.name;
                             })
                         } else {
-                            Swal.fire("This client has no attached industry.");
+                            Swal.fire("This client has no attached industry");
                         }
                     });
 
@@ -223,13 +224,15 @@
                      */
                     $.get(`/api/client_keywords_ranking/${val}`).done(rankings => {
                         rankings.forEach(val => {val.link = decodeURIComponent(val.link)})
-                        this.rankings = rankings
+                        this.rankings = rankings.sort(r => {
+                            return -(r.change + r.rank)
+                        })
                     })
                 },
                 toggleTag(id) {
                     let selectedTagsArr = this.selectedTags.split(',')
                     selectedTagsArr = selectedTagsArr.map(tag => tag.trim())
-                    let currentIndexOfTag = selectedTagsArr.indexOf( String(id) );
+                    let currentIndexOfTag = selectedTagsArr.indexOf( String(id) )
                     if (currentIndexOfTag === -1) {
                         selectedTagsArr.push(id)
                     } else {

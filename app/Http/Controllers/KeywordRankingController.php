@@ -53,11 +53,11 @@ class KeywordRankingController extends Controller
                     $new = $rankingData->first();
                     $last = $rankingData->last();
 
-                    if ($new->position > $last->position) {
+                    if ($new->position != "0" && $new->position > $last->position) {
                         /** Rised up */
                         $new->change_type = 'raise';
                         $new->change = $new->position - $last->position;
-                    } else if ($new->position < $last->position) {
+                    } else if ($new->position != "0" && $new->position < $last->position) {
                         /** Falled down */
                         $new->change_type = 'fall';
                         $new->change = $last->position - $new->position;
