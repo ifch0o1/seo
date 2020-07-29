@@ -109,10 +109,21 @@
                                     <tbody>
                                         <tr v-for="r in rankings">
                                             <td class="border px-4 py-2">@{{r.keyword}}</td>
-                                            <td class="border px-4 py-2">@{{r.position || '--'}}</td>
+                                            <td class="border px-4 py-2">
+                                                <span v-if="r.position">
+                                                    @{{r.position}}
+                                                    <i class="voyager-search text-xl text-grey-600" title="Organic position"></i>
+                                                </span>
+                                                
+                                                <span v-if="r.ad_position">
+                                                    - 
+                                                    @{{r.ad_position}}
+                                                    <i class="voyager-dollar text-xl text-green-600" title="Ad position"></i>
+                                                </span>
+                                            </td>
                                             <td class="border px-4 py-2">
                                                 <div style="align-items: center">
-                                                    @{{r.change || '--'}}
+                                                    @{{r.change || '-'}}
                                                     <i class="text-4xl align-middle"
                                                     :class="{
                                                             'voyager-double-up text-green-600': r.change_type == 'raise' && r.change > 1,
@@ -225,7 +236,7 @@
                     $.get(`/api/client_keywords_ranking/${val}`).done(rankings => {
                         rankings.forEach(val => {val.link = decodeURIComponent(val.link)})
                         this.rankings = rankings.sort(r => {
-                            return -(r.change + r.rank)
+                            return -(+r.change || 0 + +r.position || 0 + +r.ad_position || 0)
                         })
                     })
                 },

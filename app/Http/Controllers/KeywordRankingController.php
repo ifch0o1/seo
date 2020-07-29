@@ -41,9 +41,19 @@ class KeywordRankingController extends Controller
                 $rankingData = DB::table('keyword_rankings as kr')
                     ->select('kr.*', 'kw.keyword', 'kw.money_rank')
                     ->where('keyword_id', $href->keyword_id)
+                    ->where('ad', 0)
                     ->orderByDesc('kr.created_at')
                     ->leftJoin('keywords as kw', 'kr.keyword_id', '=', 'kw.id')
                     ->limit(2)
+                    ->get();
+
+                $adRankingData = DB::table('keyword_rankings as kr')
+                    ->select('kr.*', 'kw.keyword', 'kw.money_rank')
+                    ->where('keyword_id', $href->keyword_id)
+                    ->where('ad', 1)
+                    ->orderByDesc('kr.created_at')
+                    ->leftJoin('keywords as kw', 'kr.keyword_id', '=', 'kw.id')
+                    ->limit(1)
                     ->get();
 
                 // Only 1 record -> cannot calculate rank change
@@ -53,14 +63,14 @@ class KeywordRankingController extends Controller
                     $new = $rankingData->first();
                     $last = $rankingData->last();
 
-                    if ($new->position != "0" && $new->position > $last->position) {
+                    if ($new->position != '0' && $last->position != '0' && $new->position < $last->position) {
                         /** Rised up */
                         $new->change_type = 'raise';
-                        $new->change = $new->position - $last->position;
-                    } else if ($new->position != "0" && $new->position < $last->position) {
+                        $new->change = $last->position - $new->position;
+                    } else if ($new->position != '0' && $last->position != '0' && $new->position > $last->position) {
                         /** Falled down */
                         $new->change_type = 'fall';
-                        $new->change = $last->position - $new->position;
+                        $new->change = $new->position - $last->position;
                     } else {
                         /** Equals */
                         $new->change_type = 'none';
@@ -68,6 +78,13 @@ class KeywordRankingController extends Controller
                     }
 
                     $data[] = $new;
+                }
+
+                /** If ad rankind data found. process the ad data inside the row. */
+                if ($adRankingData->count()) {
+                    $adRankingRow = $adRankingData->first();
+                    $currentRow = end($data);
+                    $currentRow->ad_position = $adRankingRow->position;
                 }
             }
         }
