@@ -45,3 +45,17 @@ jobs:
         local-dir: ./ # optional, default is ./
         # Passes through options into git-ftp
         # git-ftp-args: # optional
+          
+    - name: FTP Deploy
+      uses: SamKirkland/FTP-Deploy-Action@3.1.1
+      with:
+        # Deployment destination server & path. Formatted as protocol://domain.com:port/full/destination/path/
+        ftp-server: ftp://seo.maxprogress.bg/public_html/
+        # FTP account username
+        ftp-username: bgestate
+        # FTP account password
+        ftp-password: W-nJi8K_}0X{
+        # The local folder to copy, defaults to root project folder
+        local-dir: ./ # optional, default is ./
+        # Passes through options into git-ftp
+        # git-ftp-args: # optional:  
