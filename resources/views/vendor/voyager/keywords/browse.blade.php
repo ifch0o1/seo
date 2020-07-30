@@ -14,6 +14,12 @@
         @endcan
         @can('delete', app($dataType->model_name))
             @include('voyager::partials.bulk-delete')
+
+            {{-- IVO CUSTOM DELETE NOT APPROVED START --}}
+
+            <a class="btn btn-warning" id="not_approved_delete" data-toggle="modal" data-target="#custom_delete_modal"><i class="voyager-trash"></i> <span>Hide (delete) all not approved</span></a>
+
+            {{-- IVO CUSTOM DELETE NOT APPROVED END --}}
         @endcan
         @can('edit', app($dataType->model_name))
             @if(isset($dataType->order_column) && isset($dataType->order_display_column))
@@ -447,6 +453,8 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+
+    <x-delete-modal></x-delete-modal>
 @stop
 
 @section('css')
@@ -613,5 +621,31 @@
                 }
             }
         })
+
+        let custom_delete_vue = new Vue({
+            el: "#custom_delete_modal",
+            data:{
+                delete_name: `All NOT approved Keywords`,
+                delete_text: `This action will process all not approved keywords with soft delete action. The items will exist in the database but they will be hidden.`,
+            },
+            methods: {
+                confirmDelete(ev) {
+                    $(`[row-field=admin_accepted]:not(:checked)`).each((i, el) => {
+                        let deleteId = el.getAttribute('row-id');
+
+                        $.ajax({method: "DELETE", url: `/api/keywords/${deleteId}`}).done(res => {
+                            console.log(res);
+                        })
+                    });
+
+                }
+            },
+            computed: {
+                getDeleteCount() {
+                    return $(`[row-field=admin_accepted]:not(:checked)`).length
+                }
+            }
+        })
+
     </script>
 @stop

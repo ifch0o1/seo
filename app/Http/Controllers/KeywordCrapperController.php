@@ -209,4 +209,8 @@ class KeywordCrapperController extends Controller {
         $newRecords = Keyword::whereIn('id', $record_ids)->get();
         return($newRecords);
     }
+
+    public function destroy(Keyword $keyword) {
+        $keyword->delete();
+    }
 }
