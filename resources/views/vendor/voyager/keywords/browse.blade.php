@@ -3,6 +3,13 @@
 @section('page_title', __('voyager::generic.viewing').' '.$dataType->getTranslatedAttribute('display_name_plural'))
 
 @section('page_header')
+
+    <style>
+        table .delete {
+            display: none;
+        }
+    </style>
+
     <div class="container-fluid">
         <h1 class="page-title">
             <i class="{{ $dataType->icon }}"></i> {{ $dataType->getTranslatedAttribute('display_name_plural') }}
@@ -259,11 +266,13 @@
                                                         <span row-text-content>
                                                             {{ mb_strlen( $data->{$row->field} ) > 200 ? mb_substr($data->{$row->field}, 0, 200) . ' ...' : $data->{$row->field} }}
                                                         </span>
+
+                                                        <div class="py-1 my-2 border-t border-gray-300"></div>
                                                         
                                                         {{-- IVO CUSTOM EDIT TEXT FIELD --}}
 
                                                         @if(property_exists($row->details, 'textEditable'))
-                                                            <span class="hover-icon-1 inline-block">
+                                                            <span class="hover-icon-1 inline-block pr-2">
                                                                 <i 
                                                                 row-field="{{ $row->field }}"
                                                                 row-model="{{$dataType->name}}"
@@ -281,12 +290,29 @@
                                                         {{-- CUSTOM FOR KEYWORDS SCREEN ONLY --}}
 
                                                         @if($row->field == 'keyword')
-                                                            <span class="hover-icon-1 inline-block" @click="findBottomSuggestions('{{ $data->getKey() }}', '{{ $data->{$row->field} }}')">
+                                                            <span class="hover-icon-1 inline-block pr-2" @click="findBottomSuggestions('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', $event)">
                                                                 <i class="voyager-search table-text-icon" 
                                                                 @if($data->searched_for_bottom_suggestions == 1)
                                                                     style="color: white; background: red; padding: 5px;"
                                                                 @endif
                                                                 title="Get bottom suggestions"></i>
+                                                            </span>
+
+                                                            <span class="hover-icon-1 inline-block pr-2 align-bottom cursor-pointer" @click="getRelatedKeywords('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', 'Bulgaria', $event)">
+                                                                <img 
+                                                                    src="{{ Storage::url('public/icons/bulgaria.png') }}" 
+                                                                    alt="Bulgarian related search" 
+                                                                    title="Get BG related keywords"
+                                                                    style="width: 32px"
+                                                                >
+                                                            </span>
+                                                            <span class="hover-icon-1 inline-block pr-2 align-bottom cursor-pointer" @click="getRelatedKeywords('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', 'United States'), $event">
+                                                                <img 
+                                                                    src="{{ Storage::url('public/icons/english.png') }}" 
+                                                                    alt="English related search" 
+                                                                    title="Get US related keywords"
+                                                                    style="width: 32px"
+                                                                >
                                                             </span>
                                                         @endif
 
@@ -363,6 +389,7 @@
                                                 @endif
                                             </td>
                                         @endforeach
+
                                         <td class="no-sort no-click bread-actions">
                                             @foreach($actions as $action)
                                                 @if (!method_exists($action, 'massAction'))
@@ -370,6 +397,7 @@
                                                 @endif
                                             @endforeach
                                         </td>
+
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -430,6 +458,31 @@
                         @endif
                     </div>
                 </div>
+
+                @can('add', app($dataType->model_name))
+                    <a href="{{ route('voyager.'.$dataType->slug.'.create') }}" class="btn btn-success btn-add-new">
+                        <i class="voyager-plus"></i> <span>{{ __('voyager::generic.add_new') }}</span>
+                    </a>
+                @endcan
+                @can('delete', app($dataType->model_name))
+                    {{-- IVO CUSTOM DELETE NOT APPROVED START --}}
+
+                    <a class="btn btn-warning" id="not_approved_delete" data-toggle="modal" data-target="#custom_delete_modal"><i class="voyager-trash"></i> <span>Hide (delete) all not approved</span></a>
+
+                    {{-- IVO CUSTOM DELETE NOT APPROVED END --}}
+                @endcan
+                @can('edit', app($dataType->model_name))
+                    @if(isset($dataType->order_column) && isset($dataType->order_display_column))
+                        <a href="{{ route('voyager.'.$dataType->slug.'.order') }}" class="btn btn-primary btn-add-new">
+                            <i class="voyager-list"></i> <span>{{ __('voyager::bread.order') }}</span>
+                        </a>
+                    @endif
+                @endcan
+                @can('delete', app($dataType->model_name))
+                    @if($usesSoftDeletes)
+                        <span class="btn btn-default click_upper_show_deleted_button">Toggle Deleted</span>
+                    @endif
+                @endcan
             </div>
         </div>
     </div>
@@ -543,6 +596,14 @@
     @include('libs.vue')
 
     <script>
+        $('.click_upper_bulk_delete_button').on('click', () => {
+            $('#bulk_delete_btn').click();
+        })
+        $('.click_upper_show_deleted_button').on('click', () => {
+            $('.toggle').first().find('.toggle-handle').click();
+        })
+
+
         let urlClient = getParams(window.location.href).client
 
         let filtersVue = new Vue({
@@ -594,16 +655,34 @@
                 loadingBottomSuggestions: false
             },
             methods: {
-                findBottomSuggestions(id, keyword) {
-                    this.openBottomSuggestionsModal();
+                findBottomSuggestions(id, keyword, ev) {
+                    // this.openBottomSuggestionsModal();
+                    let that = $(ev.target);
+
+                    /** Do not search again */
+                    if (that.attr('bot_suggestion_searched'))
+                        return
+
+                    that.css('opacity', '0.3').attr('bot_suggestion_searched', true)
+
                     this.loadingBottomSuggestions = true;
                     $.ajax({method: "GET", url: `/api/get_bottom_keywords/${id}`})
                         .done(res => {
+                            toastr.success(`Successful scrapped bottom keywords for keyword ${keyword}`)
                             if (res) {
                                 this.keywords = res;
                             }
                         })
                         .always(() => {this.loadingBottomSuggestions = false});
+                },
+                getRelatedKeywords(id, keyword, lang, ev) {
+                    let that = $(ev.target);
+
+                    /** Do not search again */
+                    if (that.attr('bot_suggestion_searched'))
+                        return
+
+                    that.css('opacity', '0.3').attr('bot_suggestion_searched', true)
                 },
                 openBottomSuggestionsModal() {
                     $('#bottom_suggestions_modal').modal('show');
