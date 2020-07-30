@@ -45,3 +45,17 @@ jobs:
         local-dir: ./ # optional, default is ./
         # Passes through options into git-ftp
         # git-ftp-args: # optional
+          
+    - name: FTP Deploy
+      uses: SamKirkland/FTP-Deploy-Action@3.1.1
+      with:
+        # Deployment destination server & path. Formatted as protocol://domain.com:port/full/destination/path/
+        ftp-server: ftp://magendira.maxprogress.bg/public_html/
+        # FTP account username
+        ftp-username: magendira
+        # FTP account password
+        ftp-password: eL_@r)r*#%U$
+        # The local folder to copy, defaults to root project folder
+        local-dir: ./ # optional, default is ./
+        # Passes through options into git-ftp
+        # git-ftp-args: # optional:  
