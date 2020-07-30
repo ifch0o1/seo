@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AidaSentence extends Model
 {
+    protected $perPage = 100;
     use SoftDeletes;
     protected $dates = ['deleted_at'];
 

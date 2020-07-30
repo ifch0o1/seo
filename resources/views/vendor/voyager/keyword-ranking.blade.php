@@ -110,16 +110,23 @@
                                         <tr v-for="r in rankings">
                                             <td class="border px-4 py-2">@{{r.keyword}}</td>
                                             <td class="border px-4 py-2">
-                                                <span v-if="r.position">
-                                                    @{{r.position}}
-                                                    <i class="voyager-search text-xl text-grey-600" title="Organic position"></i>
-                                                </span>
-                                                
-                                                <span v-if="r.ad_position">
-                                                    - 
-                                                    @{{r.ad_position}}
-                                                    <i class="voyager-dollar text-xl text-green-600" title="Ad position"></i>
-                                                </span>
+                                                <div class="w-full flex justify-between border-0">
+                                                    <span>
+                                                        <span v-if="r.position">
+                                                            <i class="voyager-search text-xl text-grey-600" title="Organic position"></i>
+                                                            
+                                                            @{{r.position}}
+                                                        </span>
+                                                    </span>
+                                                    
+                                                    <span>
+                                                        <span v-if="r.ad_position">
+                                                            <i class="voyager-dollar text-xl text-green-600" title="Ad position"></i>
+                                                            
+                                                            @{{r.ad_position}}
+                                                        </span>
+                                                    </span>
+                                                </div>
                                             </td>
                                             <td class="border px-4 py-2">
                                                 <div style="align-items: center">
