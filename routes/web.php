@@ -41,6 +41,4 @@ Route::post('api/push_python_words', 'KeywordCrapperController@push_python_words
 
 Route::get('api/keywords', 'KeywordCrapperController@get_api_handler');
 
-Route::get('api/get_related_keywords', 'KeywordCrapperController@get_related_keywords');
-
 Route::get('api/send_get_related_keywords_to_local_server', 'KeywordCrapperController@send_get_related_keywords_to_local_server');

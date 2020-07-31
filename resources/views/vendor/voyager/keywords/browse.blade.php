@@ -685,7 +685,7 @@
                     that.css('opacity', '0.3').attr(`related_keywords_${id}_searched`, true)
 
                     $.ajax({
-                        method: "GET", url: '{{ env('SELENIUM_SERVER_ADDRESS') }}/api/send_get_related_keywords_to_local_server',
+                        method: "GET", url: '/api/send_get_related_keywords_to_local_server',
                         data: {
                             keyword,
                             lang,

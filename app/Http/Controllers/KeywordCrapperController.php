@@ -216,38 +216,18 @@ class KeywordCrapperController extends Controller {
     }
 
     public function send_get_related_keywords_to_local_server(Request $request) {
-        $keyword = urlencode($request->input('keyword'));
+        $keyword = Keyword::find($request->input('id'));
         $lang = urlencode($request->input('lang'));
         $id = $request->input('id');
 
-        $response = Http::get(env('SELENIUM_SERVER_ADDRESS') . "/api/get_related_keywords?keyword=$keyword&lang=$lang&id=$id");
-        return $response;
-    }
-
-    public function get_related_keywords(Request $request) {
-        $lang = $request->input('lang');
-        $keyword = Keyword::find($request->input('id'));
-
-        /** 
-         * Set BG LOCALE IS IMPORTANT!
-         * This allows PHP to send cyrillic symbols to exec($COMMAND)
-         */
-        $locale='bg_BG.UTF-8';
-        setlocale(LC_ALL,$locale);
-        putenv('LC_ALL='.$locale);
-
-        $keyword_text = str_replace(" ", "_", $keyword->keyword);
-
-        # Executing selenium
-        exec("/usr/bin/python3 /var/www/html/seo/SEO_py/keyword-tool-crapper.py '$keyword_text' '$lang' 2>&1", $output);
-
-        $suggestions_arr = $output[count($output) - 1];
-        $suggestions_arr = json_decode($suggestions_arr);
+        $suggestions_arr = Http::get(env('SELENIUM_SERVER_ADDRESS') . "/api/get_related_keywords?keyword=$keyword->keyword&lang=$lang&id=$id");
+        $suggestions_arr = json_decode($suggestions_arr->body());
 
         foreach ($suggestions_arr as $k => $suggestedKeyword) {
             /**
              * Check if keyword exists
              */
+            print_r($suggestedKeyword);
             if (Keyword::whereRaw("LOWER(keyword) = '".strtolower($suggestedKeyword)."'")->withTrashed()->exists()) {
                 /** If exists in our database - we unset it to remove duplicates. */
                 unset($suggestions_arr[$k]);
@@ -262,6 +242,29 @@ class KeywordCrapperController extends Controller {
                 ]);
             }
         }
+
+        return $suggestions_arr;
+    }
+
+    public function get_related_keywords(Request $request) {
+        $lang = $request->input('lang');
+        $keyword = $request->input('keyword');
+
+        /** 
+         * Set BG LOCALE IS IMPORTANT!
+         * This allows PHP to send cyrillic symbols to exec($COMMAND)
+         */
+        $locale='bg_BG.UTF-8';
+        setlocale(LC_ALL,$locale);
+        putenv('LC_ALL='.$locale);
+
+        $keyword_text = str_replace(" ", "_", $keyword);
+
+        # Executing selenium
+        exec("/usr/bin/python3 /var/www/html/seo/SEO_py/keyword-tool-crapper.py '$keyword_text' '$lang' 2>&1", $output);
+
+        $suggestions_arr = $output[count($output) - 1];
+        $suggestions_arr = json_decode($suggestions_arr);
 
         return $suggestions_arr;
     }

@@ -38,6 +38,8 @@ Route::post('/client_keyword_href', "KeywordRankingController@storeClientKeyword
 
 Route::delete('/client_keyword_href', "KeywordRankingController@destroyClientKeywordHref");
 
+Route::get('/get_related_keywords', 'KeywordCrapperController@get_related_keywords')->middleware('cors');
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
