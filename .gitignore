@@ -15,3 +15,5 @@ yarn-error.log
 *.idea
 .vscode
 */geckodriver.log
+*screenshot*
+screenshot*

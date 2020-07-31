@@ -215,8 +215,9 @@ class KeywordCrapperController extends Controller {
     }
 
     public function get_related_keywords(Request $request) {
-        $keyword = $request->input('keyword');
+        // $keyword = $request->input('keyword');
         $lang = $request->input('lang');
+        $keyword = Keyword::find($request->input('id'));
 
         /** 
          * Set BG LOCALE IS IMPORTANT!
@@ -226,11 +227,33 @@ class KeywordCrapperController extends Controller {
         setlocale(LC_ALL,$locale);
         putenv('LC_ALL='.$locale);
 
-        $keyword = str_replace(" ", "_", $keyword);
+        $keyword_text = str_replace(" ", "_", $keyword->keyword);
 
         # Executing selenium
-        exec("/usr/bin/python3 /var/www/html/seo/SEO_py/keyword-tool-crapper.py '$keyword' '$lang' 2>&1", $output);
+        exec("/usr/bin/python3 /var/www/html/seo/SEO_py/keyword-tool-crapper.py '$keyword_text' '$lang' 2>&1", $output);
 
-        return $output;
+        $suggestions_arr = $output[count($output) - 1];
+        $suggestions_arr = json_decode($suggestions_arr);
+
+        foreach ($suggestions_arr as $k => $suggestedKeyword) {
+            /**
+             * Check if keyword exists
+             */
+            if (Keyword::whereRaw("LOWER(keyword) = '".strtolower($suggestedKeyword)."'")->withTrashed()->exists()) {
+                /** If exists in our database - we unset it to remove duplicates. */
+                unset($suggestions_arr[$k]);
+            } else {
+                /** Else we insert the keyword and save it's id. */
+                $record_ids[] = Keyword::insertGetId([
+                    'keyword' => $suggestedKeyword,
+                    'industry_id' => $keyword->industry_id,
+                    'admin_accepted' => 0,
+                    'parent_keyword_id' => $keyword->id,
+                    'level' => ($keyword->level ?? 0) + 1,
+                ]);
+            }
+        }
+
+        return $suggestions_arr;
     }
 }

@@ -306,7 +306,7 @@
                                                                     style="width: 32px"
                                                                 >
                                                             </span>
-                                                            <span class="hover-icon-1 inline-block pr-2 align-bottom cursor-pointer" @click="getRelatedKeywords('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', 'US:en'), $event">
+                                                            <span class="hover-icon-1 inline-block pr-2 align-bottom cursor-pointer" @click="getRelatedKeywords('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', 'US:en', $event)">
                                                                 <img 
                                                                     src="{{ Storage::url('public/icons/english.png') }}" 
                                                                     alt="English related search" 
@@ -688,10 +688,14 @@
                         method: "GET", url: `/api/get_related_keywords`,
                         data: {
                             keyword,
-                            lang
+                            lang,
+                            id
                         }
                     }).done(res => {
-                        // console.log(res)
+                        console.log(res);
+                        if (res && res.length) {
+                            toastr.success(`Successful scrapped RELATED KEYWORDS for keyword ${keyword}`, `${res.length} new keywords inserted.`);
+                        }
                     })
                 },
                 openBottomSuggestionsModal() {
@@ -722,7 +726,7 @@
                 confirmDelete(ev) {
                     if (this.deleting) return;
                     this.deleting = true;
-                    
+
                     $(`[row-field=admin_accepted]:not(:checked)`).each((i, el) => {
                         let deleteId = el.getAttribute('row-id');
 

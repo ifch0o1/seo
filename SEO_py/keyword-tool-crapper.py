@@ -13,19 +13,19 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-# base_keyword = str(sys.argv[1])
-# base_keyword = base_keyword.replace("_", " ")
-# lang = str(sys.argv[2])
+base_keyword = str(sys.argv[1])
+base_keyword = base_keyword.replace("_", " ")
+lang = str(sys.argv[2])
 
-base_keyword = 'женски обувки'
-lang = 'BG:bg'
+# base_keyword = 'женски обувки'
+# lang = 'BG:bg'
 
 # driver = get_seciruty_expose_cdp_driver()
 time.sleep(5.5)
 
 def get_new_driver():
     # # Server connection
-    if str(sys.argv).count('local') > 0 or True:
+    if str(sys.argv).count('local') > 0:
         # driver = webdriver.Firefox('/var/www/html/seo/SEO_py/')
         newDriver = webdriver.Chrome('/var/www/html/seo/SEO_py/chromedriver')  # Optional argument, if not specified will search path.
         newDriver.set_window_size(1920, 1080, newDriver.window_handles[0])
@@ -93,12 +93,13 @@ def get_results(language ,search_term, useDriver):
     
     keywords = ''
     for textarea in text_area_with_all_words:
-        if textarea.text:
-            keywords = textarea.text
+        text_area_value = textarea.get_attribute('value')
+        if len(text_area_value) > 0:
+            keywords = text_area_value
             break
 
     keywords = keywords.replace('\n',',').split(',')
     
-    print(keywords)
+    print(json.dumps(keywords))
 
 get_results(lang, base_keyword, get_new_driver())

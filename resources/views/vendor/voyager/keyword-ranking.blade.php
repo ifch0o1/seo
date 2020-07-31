@@ -102,6 +102,7 @@
                                             <th class="px-4 py-2 cursor-pointer">Keyword </th>
                                             <th class="px-4 py-2 cursor-pointer">Position.</th>
                                             <th class="px-4 py-2 cursor-pointer">Change</th>
+                                            <th class="px-4 py-2 cursor-pointer">M. rank</th>
                                             <th class="px-4 py-2 cursor-pointer">Link</th>
                                             <th class="px-4 py-2 cursor-pointer">Date</th>
                                         </tr>
@@ -141,6 +142,7 @@
                                                     "></i>
                                                 </div>
                                             </td>
+                                            <td class="border px-4 py-2">@{{r.money_rank}}</td>
                                             <td class="border px-4 py-2">@{{r.link}}</td>
                                             <td class="border px-4 py-2">@{{r.created_at}}</td>
                                         </tr>
@@ -243,7 +245,11 @@
                     $.get(`/api/client_keywords_ranking/${val}`).done(rankings => {
                         rankings.forEach(val => {val.link = decodeURIComponent(val.link)})
                         this.rankings = rankings.sort(r => {
-                            return -(+r.change || 0 + +r.position || 0 + +r.ad_position || 0)
+                            // return -(+r.change || 0 + +r.position || 0 + +r.ad_position || 0)
+                            if (!r.money_rank) r.money_rank = 0
+
+                            let check_sorting = 0
+                            return -r.money_rank
                         })
                     })
                 },
