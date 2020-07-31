@@ -727,6 +727,10 @@
                         $.ajax({method: "DELETE", url: `/api/keywords/${deleteId}`}).done(res => {
                             $('#custom_delete_modal').modal('hide')
                         })
+
+                        setTimeout(() => {
+                            window.location.reload()
+                        }, 1000)
                     });
 
                 }

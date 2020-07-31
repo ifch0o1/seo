@@ -18,3 +18,14 @@ a, button, .material-icons {
 .voyager .btn.btn-warning {
     background: #e68f04;
 }
+
+@media screen and (max-width: 768px) {
+    .container-fluid {
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
+    .panel-bordered>.panel-body {
+        padding: 10px 5px 5px;
+    }
+}
