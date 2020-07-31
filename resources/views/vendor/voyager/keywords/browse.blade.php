@@ -720,19 +720,20 @@
             },
             methods: {
                 confirmDelete(ev) {
+                    if (this.deleting) return;
                     this.deleting = true;
+                    
                     $(`[row-field=admin_accepted]:not(:checked)`).each((i, el) => {
                         let deleteId = el.getAttribute('row-id');
 
                         $.ajax({method: "DELETE", url: `/api/keywords/${deleteId}`}).done(res => {
                             $('#custom_delete_modal').modal('hide')
                         })
-
-                        setTimeout(() => {
-                            window.location.reload()
-                        }, 1000)
                     });
 
+                    setTimeout(() => {
+                        window.location.reload()
+                    }, 500)
                 }
             },
             computed: {

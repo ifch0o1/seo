@@ -187,7 +187,7 @@ return [
 
     // Here you can specify additional assets you would like to be included in the master.blade
     'additional_css' => [
-        'css/theme_overrides.css',
+        'css/theme_overrides.css?v2',
         'css/custom.css',
         "https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css"
     ],
