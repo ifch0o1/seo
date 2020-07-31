@@ -18,7 +18,10 @@
                 {{-- {{ csrf_field() }} --}}
 
                 {{-- DELETE BUTTON --}}
-                <span class="btn btn-danger pull-right" @click="confirmDelete($event)">{{ __('voyager::generic.bulk_delete_confirm') }}</span>
+                <span class="btn btn-danger pull-right"  @click="confirmDelete($event)">
+                    <span v-if="!deleting">{{ __('voyager::generic.bulk_delete_confirm') }}</span>
+                    <span v-else>Deleting...</span>
+                </span>
 
                 {{-- CANCEL BUTTON --}}
                 <button type="button" class="btn btn-default pull-right" data-dismiss="modal">

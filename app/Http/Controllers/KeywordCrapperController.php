@@ -213,4 +213,24 @@ class KeywordCrapperController extends Controller {
     public function destroy(Keyword $keyword) {
         $keyword->delete();
     }
+
+    public function get_related_keywords(Request $request) {
+        $keyword = $request->input('keyword');
+        $lang = $request->input('lang');
+
+        /** 
+         * Set BG LOCALE IS IMPORTANT!
+         * This allows PHP to send cyrillic symbols to exec($COMMAND)
+         */
+        $locale='bg_BG.UTF-8';
+        setlocale(LC_ALL,$locale);
+        putenv('LC_ALL='.$locale);
+
+        $keyword = str_replace(" ", "_", $keyword);
+
+        # Executing selenium
+        exec("/usr/bin/python3 /var/www/html/seo/SEO_py/keyword-tool-crapper.py '$keyword' '$lang' 2>&1", $output);
+
+        return $output;
+    }
 }

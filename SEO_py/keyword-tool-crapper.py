@@ -13,72 +13,92 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-base_keyword = str(sys.argv[1])
-base_keyword = base_keyword.replace("_", " ")
+# base_keyword = str(sys.argv[1])
+# base_keyword = base_keyword.replace("_", " ")
+# lang = str(sys.argv[2])
 
-driver = get_seciruty_expose_cdp_driver()
+base_keyword = 'женски обувки'
+lang = 'BG:bg'
 
-lang = str(sys.argv[2])
+# driver = get_seciruty_expose_cdp_driver()
+time.sleep(5.5)
 
-# # Server connection
-# if str(sys.argv).count('local') > 0:
-#     driver = webdriver.Chrome('/var/www/html/seo/SEO_py/chromedriver')  # Optional argument, if not specified will search path.
-#     # driver = webdriver.Firefox('/var/www/html/seo/SEO_py/')
-#     apiUrl = 'http://79.124.39.68/api/push_python_words'
-# else:
-#     driver = webdriver.Remote(
-#         command_executor='http://127.0.0.1:4444/wd/hub', 
-#         desired_capabilities=DesiredCapabilities.CHROME)
-#     apiUrl = 'http://seo.maxprogress.bg/api/push_python_words'
+def get_new_driver():
+    # # Server connection
+    if str(sys.argv).count('local') > 0 or True:
+        # driver = webdriver.Firefox('/var/www/html/seo/SEO_py/')
+        newDriver = webdriver.Chrome('/var/www/html/seo/SEO_py/chromedriver')  # Optional argument, if not specified will search path.
+        newDriver.set_window_size(1920, 1080, newDriver.window_handles[0])
+        
+        return newDriver
+    else:
+        newDriver = webdriver.Remote(
+            command_executor='http://127.0.0.1:4444/wd/hub', 
+            desired_capabilities=DesiredCapabilities.CHROME)
+        
+        newDriver.set_window_size(1920, 1080, newDriver.window_handles[0])
+        
+        return newDriver
     
 # driver.maximize_window()
 
-def change_language(language):
-    xpath  = f"//option[contains(text(), '{language}')]"
-    print(xpath)
-    optionToSelect = WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.XPATH, xpath)))
+def change_language(language, useDriver):
+    xpath  = f"//option[@value='{language}']"
+
+    optionToSelect = WebDriverWait(useDriver, 15).until(EC.presence_of_element_located((By.XPATH, xpath)))
     optionToSelect.click()
     time.sleep(0.5)
 
 
-def get_results(language ,search_term):
-    driver.get('https://keywordtool.io/')
-    time.sleep(15)
+def get_results(language ,search_term, useDriver):
+    useDriver.get('https://keywordtool.io/')
+    time.sleep(13)
     
-    change_language(language)
+    change_language(language, useDriver)
 
-    search_box = driver.find_element_by_name('keyword')
+    search_box = useDriver.find_element_by_name('keyword')
     search_box.send_keys(search_term)
     search_box.submit()
 
-    time.sleep(30)
+    time.sleep(17)
+    
+    useDriver.get_screenshot_as_file("screenshot1.png")
     
     try:
-        wrapper = WebDriverWait(driver, 60).until(
-            EC.visibility_of_element_located((By.ID, "content"))
+        searchForSuccessElement = WebDriverWait(useDriver, 45).until(
+            EC.presence_of_element_located((By.ID, "branding"))
         )
-    finally:
+    except Exception as e:
+        useDriver.get_screenshot_as_file("screenshot2.png")
+        useDriver.quit()
+        
+        return get_results(language, search_term, get_new_driver())
+    
         print('something went wrong. no #content element presented.')
         # driver.quit()
-    
-    select_all = WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.XPATH, '//*[@class="table table-search-results"]//th//input')))
-    
-    time.sleep(30)
-    
-    select_all.click()
 
     time.sleep(5)
+    
+    useDriver.get_screenshot_as_file("screenshot3.png")
+    
+    time.sleep(10)
 
-    copy_button = driver.find_element_by_name("copy_selected")
-    copy_button.click()
+    useDriver.get_screenshot_as_file("screenshot4.png")
     
     time.sleep(3)
-
-    copied = pyperclip.paste()
-    copied = copied.replace('\n',',').split(',')
     
-    print(copied)
+    text_area_with_all_words = WebDriverWait(useDriver, 45).until(
+            EC.presence_of_all_elements_located((By.NAME, "copy_all"))
+        )
+    
+    keywords = ''
+    for textarea in text_area_with_all_words:
+        if textarea.text:
+            keywords = textarea.text
+            break
 
-get_results(lang, base_keyword)
+    keywords = keywords.replace('\n',',').split(',')
+    
+    print(keywords)
 
-driver.quit()
+get_results(lang, base_keyword, get_new_driver())

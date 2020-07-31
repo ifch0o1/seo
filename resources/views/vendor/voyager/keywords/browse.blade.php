@@ -298,7 +298,7 @@
                                                                 title="Get bottom suggestions"></i>
                                                             </span>
 
-                                                            <span class="hover-icon-1 inline-block pr-2 align-bottom cursor-pointer" @click="getRelatedKeywords('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', 'Bulgaria', $event)">
+                                                            <span class="hover-icon-1 inline-block pr-2 align-bottom cursor-pointer" @click="getRelatedKeywords('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', 'BG:bg', $event)">
                                                                 <img 
                                                                     src="{{ Storage::url('public/icons/bulgaria.png') }}" 
                                                                     alt="Bulgarian related search" 
@@ -306,7 +306,7 @@
                                                                     style="width: 32px"
                                                                 >
                                                             </span>
-                                                            <span class="hover-icon-1 inline-block pr-2 align-bottom cursor-pointer" @click="getRelatedKeywords('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', 'United States'), $event">
+                                                            <span class="hover-icon-1 inline-block pr-2 align-bottom cursor-pointer" @click="getRelatedKeywords('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', 'US:en'), $event">
                                                                 <img 
                                                                     src="{{ Storage::url('public/icons/english.png') }}" 
                                                                     alt="English related search" 
@@ -679,10 +679,20 @@
                     let that = $(ev.target);
 
                     /** Do not search again */
-                    if (that.attr('bot_suggestion_searched'))
+                    if (that.attr(`related_keywords_${id}_searched`))
                         return
 
-                    that.css('opacity', '0.3').attr('bot_suggestion_searched', true)
+                    that.css('opacity', '0.3').attr(`related_keywords_${id}_searched`, true)
+
+                    $.ajax({
+                        method: "GET", url: `/api/get_related_keywords`,
+                        data: {
+                            keyword,
+                            lang
+                        }
+                    }).done(res => {
+                        // console.log(res)
+                    })
                 },
                 openBottomSuggestionsModal() {
                     $('#bottom_suggestions_modal').modal('show');
@@ -706,14 +716,16 @@
             data:{
                 delete_name: `All NOT approved Keywords`,
                 delete_text: `This action will process all not approved keywords with soft delete action. The items will exist in the database but they will be hidden.`,
+                deleting: false
             },
             methods: {
                 confirmDelete(ev) {
+                    this.deleting = true;
                     $(`[row-field=admin_accepted]:not(:checked)`).each((i, el) => {
                         let deleteId = el.getAttribute('row-id');
 
                         $.ajax({method: "DELETE", url: `/api/keywords/${deleteId}`}).done(res => {
-                            console.log(res);
+                            $('#custom_delete_modal').modal('hide')
                         })
                     });
 

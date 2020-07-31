@@ -40,3 +40,5 @@ Route::resource('api/aida_posts', "AidaPostsController");
 Route::post('api/push_python_words', 'KeywordCrapperController@push_python_words');
 
 Route::get('api/keywords', 'KeywordCrapperController@get_api_handler');
+
+Route::get('api/get_related_keywords', 'KeywordCrapperController@get_related_keywords');
