@@ -227,7 +227,6 @@ class KeywordCrapperController extends Controller {
             /**
              * Check if keyword exists
              */
-            print_r($suggestedKeyword);
             if (Keyword::whereRaw("LOWER(keyword) = '".strtolower($suggestedKeyword)."'")->withTrashed()->exists()) {
                 /** If exists in our database - we unset it to remove duplicates. */
                 unset($suggestions_arr[$k]);
@@ -238,6 +237,7 @@ class KeywordCrapperController extends Controller {
                     'industry_id' => $keyword->industry_id,
                     'admin_accepted' => 0,
                     'parent_keyword_id' => $keyword->id,
+                    'searched_for_related_kws' => 1,
                     'level' => ($keyword->level ?? 0) + 1,
                 ]);
             }

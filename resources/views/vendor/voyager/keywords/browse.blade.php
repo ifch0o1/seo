@@ -293,13 +293,16 @@
                                                             <span class="hover-icon-1 inline-block pr-2" @click="findBottomSuggestions('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', $event)">
                                                                 <i class="voyager-search table-text-icon" 
                                                                 @if($data->searched_for_bottom_suggestions == 1)
-                                                                    style="color: white; background: red; padding: 5px;"
+                                                                    style="opacity: 0.3"
                                                                 @endif
                                                                 title="Get bottom suggestions"></i>
                                                             </span>
 
                                                             <span class="hover-icon-1 inline-block pr-2 align-bottom cursor-pointer" @click="getRelatedKeywords('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', 'BG:bg', $event)">
                                                                 <img 
+                                                                    @if($data->searched_for_related_kws == 1)
+                                                                        style="opacity: 0.3"
+                                                                    @endif
                                                                     src="{{ Storage::url('public/icons/bulgaria.png') }}" 
                                                                     alt="Bulgarian related search" 
                                                                     title="Get BG related keywords"
@@ -308,6 +311,9 @@
                                                             </span>
                                                             <span class="hover-icon-1 inline-block pr-2 align-bottom cursor-pointer" @click="getRelatedKeywords('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', 'US:en', $event)">
                                                                 <img 
+                                                                    @if($data->searched_for_related_kws == 1)
+                                                                        style="opacity: 0.3"
+                                                                    @endif
                                                                     src="{{ Storage::url('public/icons/english.png') }}" 
                                                                     alt="English related search" 
                                                                     title="Get US related keywords"
