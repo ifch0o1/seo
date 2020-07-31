@@ -7,6 +7,7 @@ use App\Keyword;
 use App\Industry;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class KeywordCrapperController extends Controller {
     /**
@@ -214,8 +215,16 @@ class KeywordCrapperController extends Controller {
         $keyword->delete();
     }
 
+    public function send_get_related_keywords_to_local_server(Request $request) {
+        $keyword = urlencode($request->input('keyword'));
+        $lang = urlencode($request->input('lang'));
+        $id = $request->input('id');
+
+        $response = Http::get(env('SELENIUM_SERVER_ADDRESS') . "/api/get_related_keywords?keyword=$keyword&lang=$lang&id=$id");
+        return $response;
+    }
+
     public function get_related_keywords(Request $request) {
-        // $keyword = $request->input('keyword');
         $lang = $request->input('lang');
         $keyword = Keyword::find($request->input('id'));
 
