@@ -65,7 +65,7 @@ def get_results(language ,search_term, useDriver):
     useDriver.get_screenshot_as_file("screenshot1.png")
     
     try:
-        searchForSuccessElement = WebDriverWait(useDriver, 45).until(
+        searchForSuccessElement = WebDriverWait(useDriver, 25).until(
             EC.presence_of_element_located((By.ID, "branding"))
         )
     except Exception as e:

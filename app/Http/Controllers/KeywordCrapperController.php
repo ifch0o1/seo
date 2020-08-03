@@ -217,6 +217,8 @@ class KeywordCrapperController extends Controller {
 
     public function send_get_related_keywords_to_local_server(Request $request) {
         $keyword = Keyword::find($request->input('id'));
+        $keyword->searched_for_related_kws = 1;
+        $keyword->save();
         $lang = urlencode($request->input('lang'));
         $id = $request->input('id');
 
@@ -237,7 +239,6 @@ class KeywordCrapperController extends Controller {
                     'industry_id' => $keyword->industry_id,
                     'admin_accepted' => 0,
                     'parent_keyword_id' => $keyword->id,
-                    'searched_for_related_kws' => 1,
                     'level' => ($keyword->level ?? 0) + 1,
                 ]);
             }
