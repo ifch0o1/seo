@@ -13,4 +13,6 @@ class AidaPost extends Model
 
     protected $primaryKey = "id";
     protected $fillable = ['approved', 'text'];
+
+    
 }

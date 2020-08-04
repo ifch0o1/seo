@@ -40,6 +40,10 @@ Route::delete('/client_keyword_href', "KeywordRankingController@destroyClientKey
 
 Route::get('/get_related_keywords', 'KeywordCrapperController@get_related_keywords')->middleware('cors');
 
+/** Client oriented APIs */
+Route::get('/v1/keywords', "KeywordsController@v1_get")->middleware('auth_token');
+Route::get('/v1/aida_posts', "AidaPostsController@v1_get")->middleware('auth_token');
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

@@ -33,8 +33,11 @@ Route::get('admin/keyword-ranking', "KeywordRankingController")
 Route::post('api/aida_posts/generate', "AidaGeneratorController@generate")
     ->middleware('auth');
 
+/** 
+ * Keywords and Aida_posts for ADMIN PANEL
+ * You can found client oriented API routes in api.php
+ */
 Route::resource('api/keywords', "KeywordCrapperController");
-
 Route::resource('api/aida_posts', "AidaPostsController");
 
 Route::post('api/push_python_words', 'KeywordCrapperController@push_python_words');
@@ -42,3 +45,6 @@ Route::post('api/push_python_words', 'KeywordCrapperController@push_python_words
 Route::get('api/keywords', 'KeywordCrapperController@get_api_handler');
 
 Route::get('api/send_get_related_keywords_to_local_server', 'KeywordCrapperController@send_get_related_keywords_to_local_server');
+
+/** Only administrator managed routes */
+Route::resource('admin/manage_tokens', 'AuthTokensController')->middleware('admin.user');

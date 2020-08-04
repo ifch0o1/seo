@@ -7,6 +7,36 @@ use Illuminate\Http\Request;
 
 class AidaPostsController extends Controller
 {
+    public function v1_get(Request $request) {
+        $client_id = $request->client_id;
+        $include_poor = ($request->include_poor === 'true');
+
+        if (!$client_id) {
+            /** Validation */
+            return abort('401');
+        } else {
+            /**
+             * Base query
+             */
+            $posts = AidaPost::where('client_id', $client_id);
+
+            /**
+             * Filters
+             */
+            if (!$include_poor) {
+                $posts->where('approved', 1);
+            }
+            
+            /**
+             * Response
+             */
+            $posts = $posts->get();
+
+            return collect([
+                'posts' => $posts->toJson()
+            ]);
+        }
+    }
     /**
      * Display a listing of the resource.
      *

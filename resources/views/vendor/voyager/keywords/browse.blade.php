@@ -105,7 +105,7 @@
                                 @endif
                             </form>
                         @endif
-                        <div class="table-responsive" id="vue-">
+                        <div class="table-responsive" id="vue-tabl">
                             <table id="dataTable" class="table table-hover">
                                 <thead>
                                     <tr>
@@ -290,7 +290,7 @@
                                                         {{-- CUSTOM FOR KEYWORDS SCREEN ONLY --}}
 
                                                         @if($row->field == 'keyword')
-                                                            <span class="hover-icon-1 inline-block pr-2" @click="findBottomSuggestions('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', $event)">
+                                                            <span class="hover-icon-1 inline-block pr-2" @click="findBottomSuggestions(`{{ $data->getKey() }}`, `{{ $data->{$row->field} }}`, $event)">
                                                                 <i class="voyager-search table-text-icon" 
                                                                 @if($data->searched_for_bottom_suggestions == 1)
                                                                     style="opacity: 0.3"
@@ -298,7 +298,7 @@
                                                                 title="Get bottom suggestions"></i>
                                                             </span>
 
-                                                            <span class="hover-icon-1 inline-block pr-2 align-bottom cursor-pointer" @click="getRelatedKeywords('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', 'BG:bg', $event)">
+                                                            <span class="hover-icon-1 inline-block pr-2 align-bottom cursor-pointer" @click="getRelatedKeywords(`{{ $data->getKey() }}`, `{{ $data->{$row->field} }}`, 'BG:bg', $event)">
                                                                 <img 
                                                                     src="{{ Storage::url('public/icons/bulgaria.png') }}" 
                                                                     alt="Bulgarian related search" 
@@ -311,7 +311,7 @@
                                                                     "
                                                                 >
                                                             </span>
-                                                            <span class="hover-icon-1 inline-block pr-2 align-bottom cursor-pointer" @click="getRelatedKeywords('{{ $data->getKey() }}', '{{ $data->{$row->field} }}', 'US:en', $event)">
+                                                            <span class="hover-icon-1 inline-block pr-2 align-bottom cursor-pointer" @click="getRelatedKeywords(`{{ $data->getKey() }}`, `{{ $data->{$row->field} }}`, 'US:en', $event)">
                                                                 <img 
                                                                     src="{{ Storage::url('public/icons/english.png') }}" 
                                                                     alt="English related search" 
@@ -658,7 +658,7 @@
         })
 
         let tableVue = new Vue({
-            el: '#vue-',
+            el: '#vue-tabl',
             data: {
                 keywords: [],
                 keywordsSelectedForApproval: [],

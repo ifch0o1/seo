@@ -17,4 +17,10 @@ class Keyword extends Model {
 
     use SoftDeletes;
     protected $dates = ['deleted_at'];
+
+    public static function set_client($client_id) {
+        $client = Client::findOrFail($client_id);
+
+        return self::where("industry_id", $client->industry_id);
+    }
 }

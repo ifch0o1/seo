@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Storage;
 
 class AidaGeneratorController extends Controller
 {
+    private $used_title_sentences = [];
+
     /** Custom function for generating image */
     private function generateImage($keyword, $folder) {
         $request = request();
@@ -80,6 +82,62 @@ class AidaGeneratorController extends Controller
         return $img;
     }
 
+    private function generateTitle(Keyword $kw, $tag, $industry, $client) {
+        $title = AidaSentence::where('tag_id', $tag)
+            ->where('admin_accepted', '1')
+            ->where('industry_id', $industry)
+            ->whereNotIn('id', $this->used_title_sentences)
+            ->inRandomOrder()
+            ->limit(1)->first();
+
+        if (!$title) {
+            $title = AidaSentence::where('tag_id', $tag)
+                ->where('admin_accepted', '1')
+                ->whereNotIn('id', $this->used_title_sentences)
+                ->inRandomOrder()
+                ->limit(1)->first();
+        }
+
+        if ($title) {
+            $this->used_title_sentences[] = $title->id;
+            $titleText = $this->replacePlaceholders($title->text, $client, $industry, $kw);
+
+            return $titleText;
+        } else {
+            return false;
+        }
+    }
+
+    private function replacePlaceholders($text, $client, $industry, $kw) {
+        $text = str_replace('{k}', '<b>"'.$kw['keyword'].'"</b>', $text);
+                    
+        if ($industry) {
+            $industryName = Industry::find($industry)->name;
+            $text = str_replace('{industry}', '<b>'.$industryName.'</b>', $text);
+        }
+
+        /**
+         * Client replacements (with variations or not)
+         */
+        if ($client) {
+            $clientModel = Client::find($client);
+            /** Set default firm name */
+            $firm_name = $clientModel->name;
+
+            /** But if we have specificialy firm name variations, we get one random of it. */
+            $firm_name_variations = $clientModel->firm_name_variations;
+            if ($firm_name_variations) {
+                $firm_names = array_filter(explode(",", $firm_name_variations));
+                $firm_name = $firm_names[array_rand($firm_names)];
+                $firm_name = trim($firm_name);
+            }
+
+            $text = str_replace('{firm}', '<b>'.$firm_name.'</b>', $text);
+        }
+
+        return $text;
+    }
+
     private function getImgHTML($src, $keyword) {
         $request = request();
         $css = $request->input('customImageCss');
@@ -126,6 +184,7 @@ class AidaGeneratorController extends Controller
         $generate_activated = $request->input('generate_activated');
         $keywords = $request->input('selectedKeywordIds');
         $tags = $request->input('tagIds');
+        $titleTags = $request->input('titleTagIds');
 
         $savedPosts = [];
 
@@ -158,7 +217,7 @@ class AidaGeneratorController extends Controller
                         /**
                          * ==================================
                          * 
-                         * IMAGE GENERATION
+                         * IMAGE GENERATION BY IMAGE TAG
                          * 
                          * ==================================
                          */
@@ -198,7 +257,6 @@ class AidaGeneratorController extends Controller
                      * 
                      * ==================================
                      */
-
                     
                     /** 50/50 Change to get industry sentence */
                     $change = mt_rand(0,1);
@@ -241,40 +299,20 @@ class AidaGeneratorController extends Controller
                     $sentence->used++;
                     $sentence->save();
                     
-                    /** Additional processing... */
-                    $sentenceText = $this->clearSentence($sentence['text']);
-                    $sentenceText = str_replace('{k}', '<b>"'.$kw['keyword'].'"</b>', $sentenceText);
-
                     /**
                      * Replacements
                      */
-                    if ($industry) {
-                        $industryName = Industry::find($industry)->name;
-                        $sentenceText = str_replace('{industry}', '<b>'.$industryName.'</b>', $sentenceText);
-                    }
-
-                    /**
-                     * Client replacements (with variations or not)
-                     */
-                    if ($client) {
-                        $clientModel = Client::find($client);
-                        /** Set default firm name */
-                        $firm_name = $clientModel->name;
-
-                        /** But if we have specificialy firm name variations, we get one random of it. */
-                        $firm_name_variations = $clientModel->firm_name_variations;
-                        if ($firm_name_variations) {
-                            $firm_names = array_filter(explode(",", $firm_name_variations));
-                            $firm_name = $firm_names[array_rand($firm_names)];
-                            $firm_name = trim($firm_name);
-                        }
-
-                        $sentenceText = str_replace('{firm}', '<b>'.$firm_name.'</b>', $sentenceText);
-                    }
+                    $sentenceText = $this->clearSentence($sentence['text']);
+                    $sentenceText = $this->replacePlaceholders($sentenceText, $client, $industry, $kw);
 
                     /** Add the sentence in Post text. */
                     $post .= $sentenceText;
                 }
+            }
+
+            /** Generate title (random tag id every time) */
+            if ($titleTags && !empty($titleTags)) {
+                $title = $this->generateTitle($kw, $titleTags[array_rand($titleTags)], $industry, $client);
             }
 
             /** Create AIDA post. */
@@ -283,6 +321,8 @@ class AidaGeneratorController extends Controller
             $aidaPost->industry_id = $industry;
             $aidaPost->keyword_id = $kwId;
             $aidaPost->client_id = $client;
+            if ($title)
+                $aidaPost->title = $title;
             
             if ($generate_activated) {
                 $aidaPost->approved = 1;

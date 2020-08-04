@@ -33,6 +33,11 @@
                                 </select2>
                             </div>
                             <div class="col-md-4">
+                                <span>Title Tags</span>
+                                <input class="form-control" type="text" v-model="titleTags">
+
+                                <br>
+
                                 <span>AIDA Tags</span>
                                 <input class="form-control" type="text" v-model="selectedTags">
                                 <span v-for="tag in tags" class="mr-2 my-2 badge badge-lg badge-primary cursor-pointer" @click="toggleTag(tag.id)">#@{{tag.id}} ( @{{tag.name}} )</span>
@@ -50,12 +55,15 @@
                                 <table class="table-auto text-lg w-full" v-if="savedPosts.length">
                                     <thead class="select-none">
                                         <tr class="bg-gray-200">
-                                            <th class="px-4 py-2 cursor-pointer">Text</th>
+                                            <th class="px-4 py-2 cursor-pointer">Posts</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr v-for="post in savedPosts">
-                                            <td class="border px-4 py-2" v-html="post.text"></td>
+                                            <td class="border px-4 py-2">
+                                                <h3 class="text-2xl mb-16" v-html="post.title"></h3>
+                                                <div v-html="post.text"></div>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -191,7 +199,8 @@
                 client_id: '',
                 clients: select2_clients,
                 tags: tags,
-                selectedTags: "img-office,1,2,3,4",
+                selectedTags: 'img-office,1,2,3,4',
+                titleTags: '7',
                 keywords: [],
                 selectedKeywords: {},
                 currentSort:'money_rank',
@@ -203,8 +212,8 @@
                 folders: {!! json_encode($folders) ?? [] !!},
                 customImageText: '',
                 customImageCss: 'max-width: 100%; max-height: 100%;',
-                cropImageY: "4",
-                cropImageX: "1"
+                cropImageY: '4',
+                cropImageX: '1'
             },
             methods: {
                 start() {
@@ -213,6 +222,7 @@
                     }
 
                     let tagIds = this.selectedTags.split(',').map(tag => tag.trim()).filter(val => val);
+                    let titleTagIds = this.titleTags.split(',').map(tag => tag.trim()).filter(val => val);
                     let keywordIds = Object.keys(this.selectedKeywords);
                     let selectedKeywordIds = keywordIds.filter(val => this.selectedKeywords[val]);
 
@@ -222,6 +232,7 @@
                         client: this.client_id,
                         tagIds,
                         selectedKeywordIds,
+                        titleTagIds,
                         generate_activated: this.generate_activated,
                         customImageText: this.customImageText,
                         customImageCss: this.customImageCss,
