@@ -104,7 +104,7 @@ class AidaGeneratorController extends Controller
 
             return $titleText;
         } else {
-            return false;
+            return $kw['keyword'];
         }
     }
 
@@ -211,7 +211,7 @@ class AidaGeneratorController extends Controller
                 if ( !is_numeric($tagId) ) {
                     $parts = explode('-', $tagId);
                     $type = $parts[0];
-                    $value = $parts[1];
+                    $value = implode('-', array_slice($parts, 1, count($parts)-1, true));
 
                     if ($type == 'img') {
                         /**

@@ -29,11 +29,16 @@
                         <form v-if="!loading">
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label for="" class="control-label">Keyword</label>
-                                    <input type="text" v-model="keyword" placeholder="Keyword" class="form-control">
+                                    <label for="" class="control-label">Keywords</label>
+                                    <textarea type="text" rows="10" v-model="keywords" placeholder="Keywords" class="form-control"></textarea>
                                 </div>
 
                                 <div class="form-group">
+                                    <input type="checkbox" id="only_insert" v-model='insertMultipleWordsOnly'>
+                                    <label for="only_insert">Only insert these words (MULTIPLE INSERT)</label>
+                                </div>
+
+                                <div class="form-group" v-if="!insertMultipleWordsOnly">
                                     <label for="" class="control-label">Level</label>
                                     <input type="text" v-model="level" max="2" placeholder="Level" class="form-control">
                                 </div>
@@ -45,7 +50,7 @@
                                     </select2>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="form-group" v-if="!insertMultipleWordsOnly">
                                     <label for="" class="control-label">
                                         Symbols
                                         <span class="badge badge-info cursor-pointer" @click="inputCyrilic">Cyrilic</span>
@@ -57,7 +62,8 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <button type="button" class="btn btn-success" @click="start()">Crap it</button>
+                                    <button v-if="!insertMultipleWordsOnly" type="button" class="btn btn-success" @click="start()">Crap it</button>
+                                    <button v-if="insertMultipleWordsOnly" type="button" class="btn btn-success" @click="insertWords()">Insert these words</button>
                                 </div>
                             </div>
                         </form>
@@ -85,59 +91,84 @@
             el: "#vue",
             data: {
                 loading: false,
-                keyword: "",
+                keywords: "",
                 level: 0,
                 ready: false,
                 industry: '',
                 industries: select2_industries,
-                symbols: cyrilicS + latinS + numbers
+                symbols: cyrilicS + latinS + numbers,
+                insertMultipleWordsOnly: false
             },
             methods: {
                 start() {
-                    if (!this.keyword) {
-                        alert('no keyword.')
+                    if (!this.keywords) {
+                        alert('no keywords.')
                         return false
                     }
-                    
+
+                    let keywordsArr = this.keywords.split(/\r?\n/g)
+
                     this.loading = true;
                     this.ready = false;
 
-                    $.post('{{ env('SELENIUM_SERVER_ADDRESS') }}/api/custom_python_test', {
-                        "keyword": this.keyword.replace(/\s+/g, '_').toLowerCase(),
-                        "level": this.level,
-                        "symbols": this.symbols,
-                        "industry": this.industry
-                    }).done((res) => {
+                    for (keyword of keywordsArr) {
+                        $.post('{{ env('SELENIUM_SERVER_ADDRESS') }}/api/custom_python_test', {
+                            "keyword": keyword.replace(/\s+/g, '_').toLowerCase(),
+                            "level": this.level,
+                            "symbols": this.symbols,
+                            "industry": this.industry
+                        }).done((res) => {
+                            if (res.indexOf('___NO_DATA_EXCEPTION___') !== -1) {
+                                this.ready = false;
+
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'No data.',
+                                    text: 'The google did not return any suggestions for this keyword! Sorry :(',
+                                    footer: 'Test it your self to catch the problem.'
+                                })
+
+                            } else if (res.indexOf('___INVALID_JSON___') !== -1) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Server error.',
+                                    text: 'Server error occured',
+                                    footer: 'The pipe connection broken'
+                                })
+                            }
+                            else {
+                                this.keywords = '';
+                            }
+
+                            console.log(res)
+                        }).fail((res) => {
+                            this.loading = false;
+                            console.error(res)
+                            alert(res)
+                        })
+                    }
+
+                    $(document).ajaxStop(() => {
                         this.loading = false;
                         this.ready = true;
+                    })
+                },
+                insertWords() {
+                    if (!this.keywords) {
+                        alert('no keywords.')
+                        return false
+                    }
 
-                        if (res.indexOf('___NO_DATA_EXCEPTION___') !== -1) {
-                            this.ready = false;
+                    let keywordsArr = this.keywords.split(/\r?\n/g)
+                    this.loading = true
 
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'No data.',
-                                text: 'The google did not return any suggestions for this keyword! Sorry :(',
-                                footer: 'Test it your self to catch the problem.'
-                            })
-
-                        } else if (res.indexOf('___INVALID_JSON___') !== -1) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Server error.',
-                                text: 'Server error occured',
-                                footer: 'The pipe connection broken'
-                            })
-                        }
-                        else {
-                            this.keyword = '';
-                        }
-
-                        console.log(res)
-                    }).fail((res) => {
+                    $.ajax({method: 'POST', url:"/api/store_keywords", data: {
+                        keywords: keywordsArr,
+                        industry: this.industry
+                    }}).done(res => {
                         this.loading = false;
-                        console.error(res)
-                        alert(res)
+                        this.keywords = '';
+                        Swal.fire({title: "Good to go!", icon: "success"});
                     })
                 },
                 inputLatin() {

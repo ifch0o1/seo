@@ -105,7 +105,7 @@
 
                                 <div class="bg-gray-300 p-3 mt-4">
                                     <h4 class="mt-4 text-xl">Available Image Folders:</h4>
-                                    <p class="my-2 inline-block underline" style="width: 33%" v-for="folder in folders">@{{folder}}</p>
+                                    <p class="my-2 underline" v-for="folder in folders">@{{folder}}</p>
                                 </div>
 
                                 <div class="mt-5">

@@ -77,13 +77,31 @@ class KeywordCrapperController extends Controller {
         $this->insert_keywords($keywords_arr, $industry, $thisCrapId);
     }
 
-    private function insert_keywords($keyword_arr, $industry, $crap_id, $parent_keyword_id = 0) {        
-        foreach($keyword_arr as $kw) {
+    public function store_keywords(Request $request) {
+        $keywords = $request->input('keywords');
+        $industry = $request->input('industry');
+
+        /** Remove empty strings */
+        $keywords = array_filter($keywords);
+
+        $keywords_arr = array_map(function($keyword) {
+            return [
+                'name' => trim($keyword),
+                'level' => 0,
+                'admin_accepted' => 1
+            ];
+        }, $keywords);
+
+        $this->insert_keywords($keywords_arr, $industry, NULL);
+    }
+
+    private function insert_keywords($keywords_arr, $industry, $crap_id, $parent_keyword_id = 0) {        
+        foreach($keywords_arr as $kw) {
             $keyword = [
                 "level" => $kw['level'],
                 "keyword" => $kw['name'],
                 "crap_id" => $crap_id,
-                "admin_accepted" => 0,
+                "admin_accepted" => $kw['admin_accepted'] ?: 0,
                 'parent_keyword_id' => $parent_keyword_id,
                 'industry_id' => $industry,
                 'created_at' => date('Y-m-d H:i:s')

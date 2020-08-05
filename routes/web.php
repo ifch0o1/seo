@@ -38,6 +38,7 @@ Route::post('api/aida_posts/generate', "AidaGeneratorController@generate")
  * You can found client oriented API routes in api.php
  */
 Route::resource('api/keywords', "KeywordCrapperController");
+Route::post('api/store_keywords', "KeywordCrapperController@store_keywords");
 Route::resource('api/aida_posts', "AidaPostsController");
 
 Route::post('api/push_python_words', 'KeywordCrapperController@push_python_words');
