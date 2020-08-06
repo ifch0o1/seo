@@ -139,6 +139,10 @@ class AidaGeneratorController extends Controller
             $text = str_replace('{contactUrl}', '<b>'.$clientModel->contactUrl.'</b>', $text);
 
             $text = str_replace('{fb}', '<b>'.$clientModel->fb.'</b>', $text);
+            
+            $text = str_replace('{email}', '<b>'.$clientModel->email.'</b>', $text);
+
+            $text = str_replace('{viber}', '<b>'.$clientModel->viber.'</b>', $text);
 
             $text = str_replace('{twitter}', '<b>'.$clientModel->twitter.'</b>', $text);
         }
