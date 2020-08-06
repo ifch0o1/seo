@@ -33,7 +33,7 @@ class AidaPostsController extends Controller
             $posts = $posts->get();
 
             return collect([
-                'posts' => $posts->toJson()
+                'posts' => $posts
             ]);
         }
     }

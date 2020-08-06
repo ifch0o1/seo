@@ -221,6 +221,10 @@
                         return false;
                     }
 
+                    if (this.loadingPosts) return;
+
+                    this.savedPosts = [];
+
                     let tagIds = this.selectedTags.split(',').map(tag => tag.trim()).filter(val => val);
                     let titleTagIds = this.titleTags.split(',').map(tag => tag.trim()).filter(val => val);
                     let keywordIds = Object.keys(this.selectedKeywords);
@@ -244,7 +248,7 @@
                             this.savedPosts = savedPosts;
                         }
                     }).fail(err => {
-                        
+                        this.loadingPosts = false;
                     });
                 },
                 validate() {

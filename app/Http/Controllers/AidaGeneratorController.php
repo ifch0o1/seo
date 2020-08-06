@@ -133,6 +133,14 @@ class AidaGeneratorController extends Controller
             }
 
             $text = str_replace('{firm}', '<b>'.$firm_name.'</b>', $text);
+
+            $text = str_replace('{tel}', '<b>'.$clientModel->tel.'</b>', $text);
+
+            $text = str_replace('{contactUrl}', '<b>'.$clientModel->contactUrl.'</b>', $text);
+
+            $text = str_replace('{fb}', '<b>'.$clientModel->fb.'</b>', $text);
+
+            $text = str_replace('{twitter}', '<b>'.$clientModel->twitter.'</b>', $text);
         }
 
         return $text;

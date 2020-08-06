@@ -47,3 +47,4 @@ Route::get('/v1/aida_posts', "AidaPostsController@v1_get")->middleware('auth_tok
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+

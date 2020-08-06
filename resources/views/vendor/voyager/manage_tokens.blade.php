@@ -5,7 +5,7 @@
 @section('page_header')
     <div class="container-fluid">
         <h1 class="page-title">
-            <i class="voyager-archive"></i> Manage Authentication Tokens
+            <i class="voyager-key"></i> Manage Authentication Tokens
         </h1>
     </div>
 @stop
@@ -28,7 +28,7 @@
                             </div>
 
                             <div class="col-md-12">
-                                <span @click="createNewToken" class="btn btn-success">Create new token for this client</span>
+                                <span @click="createNewToken" v-if="client_id" class="btn btn-success">Create new token for this client</span>
                             </div>
 
                             <div class="col-md-12" v-if="new_tokens.length">
@@ -38,7 +38,13 @@
 
                             <div class="col-md-12" v-if="client_tokens.length">
                                 Tokens
-                                <p v-for="token in client_tokens">#@{{token.id}} - <b>@{{token.token}}</b> @{{token.active ? 'active' : 'not active'}} (@{{token.type}})</p>
+                                <p v-for="token in client_tokens">
+                                    #@{{token.id}} - 
+                                    <b>@{{token.token}}</b> 
+                                    @{{token.active ? 'active' : 'not active'}} 
+                                    (@{{token.type}})
+                                    {{-- <i class="voyager-trash cursor-pointer ml-6 text-red-500" title="Deactivate" @click="deactivate(token)"></i> --}}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -73,9 +79,11 @@
             },
             methods: {
                 clientChange(val) {
+                    Swal.fire("Loading...");
                     $.ajax({method: "GET", url: `/admin/manage_tokens/${this.client_id}`}).done(res => {
                         this.new_tokens = [];
                         this.client_tokens = res;
+                        Swal.close();
                     });
                 },
                 createNewToken() {

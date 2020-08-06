@@ -33,7 +33,7 @@ class KeywordsController extends Controller
             $keywords = $keywords->get();
 
             return collect([
-                'keywords' => $keywords->toJson()
+                'keywords' => $keywords
             ]);
         }
     }
