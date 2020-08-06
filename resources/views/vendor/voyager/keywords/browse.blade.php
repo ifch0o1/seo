@@ -708,9 +708,11 @@
                         }
                     })
                 },
+                /** deprecated (removed) */
                 openBottomSuggestionsModal() {
                     $('#bottom_suggestions_modal').modal('show');
                 },
+                /** deprecated (removed) */
                 closeBottomSuggestionsModal() {
                     $('#bottom_suggestions_modal').modal('hide');
                 },
@@ -727,35 +729,51 @@
 
         let custom_delete_vue = new Vue({
             el: "#custom_delete_modal",
-            data:{
+            data: {
                 delete_name: `All NOT approved Keywords`,
                 delete_text: `This action will process all not approved keywords with soft delete action. The items will exist in the database but they will be hidden.`,
-                deleting: false
+                deleting: false,
+                getDeleteCount: $(`[row-field=admin_accepted]:not(:checked)`).length
             },
             methods: {
+                updateDeleteCount() {
+                    this.getDeleteCount = $(`[row-field=admin_accepted]:not(:checked)`).length
+                },
                 confirmDelete(ev) {
                     if (this.deleting) return;
                     this.deleting = true;
 
+                    let deleteQueAjaxes = [];
+
+                    Swal.fire({
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        title: "Deleting...",
+                        allowOutsideClick: false
+                    });
+
                     $(`[row-field=admin_accepted]:not(:checked)`).each((i, el) => {
                         let deleteId = el.getAttribute('row-id');
 
-                        $.ajax({method: "DELETE", url: `/api/keywords/${deleteId}`}).done(res => {
+                        let thisAjax = $.ajax({method: "DELETE", url: `/api/keywords/${deleteId}`}).done(res => {
                             $('#custom_delete_modal').modal('hide')
                         })
+                        deleteQueAjaxes.push(thisAjax);
                     });
 
-                    setTimeout(() => {
-                        window.location.reload()
-                    }, 500)
+                    $.when(...deleteQueAjaxes).then(() => {
+                        Swal.close();
+                        window.location.reload();
+                    });
                 }
             },
             computed: {
-                getDeleteCount() {
-                    return $(`[row-field=admin_accepted]:not(:checked)`).length
-                }
+
             }
         })
 
+        $('.custom-browse-checkbox').on('change', ev => {
+            custom_delete_vue.updateDeleteCount()
+        });
     </script>
 @stop
