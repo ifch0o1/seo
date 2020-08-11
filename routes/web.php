@@ -33,6 +33,9 @@ Route::get('admin/keyword-ranking', "KeywordRankingController")
 Route::post('api/aida_posts/generate', "AidaGeneratorController@generate")
     ->middleware('auth');
 
+Route::get('/aida_posts/reGenerateTitle/{post}', "AidaGeneratorController@reGenerateTitle")
+    ->middleware('auth');
+
 /** 
  * Keywords and Aida_posts for ADMIN PANEL
  * You can found client oriented API routes in api.php

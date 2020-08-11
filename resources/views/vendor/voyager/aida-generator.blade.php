@@ -61,6 +61,14 @@
                                     <tbody>
                                         <tr v-for="post in savedPosts">
                                             <td class="border px-4 py-2">
+                                                {{-- GENERATE NEW TITLE --}}
+                                                <div class="w-full text-center">
+                                                    <span class="cursor-pointer" @click="reGenerateTitle(post)" title="Refresh Title">
+                                                        <i class="voyager-refresh"></i> Title
+                                                    </span>
+                                                </div>
+
+                                                {{-- SHOWING TITLE --}}
                                                 <h3 class="text-2xl mb-16" v-html="post.title"></h3>
                                                 <div v-html="post.text"></div>
                                             </td>
@@ -212,8 +220,8 @@
                 folders: {!! json_encode($folders) ?? [] !!},
                 customImageText: '',
                 customImageCss: 'max-width: 100%; max-height: 100%;',
-                cropImageY: '4',
-                cropImageX: '1'
+                cropImageY: '8',
+                cropImageX: '0'
             },
             methods: {
                 start() {
@@ -280,6 +288,16 @@
                     } else {
                         return true
                     }
+                },
+                reGenerateTitle(post) {
+                    let titleTagsArr = this.titleTags.split(',').filter(val => !!val);
+
+                    $.ajax({url: `/aida_posts/reGenerateTitle/${post.id}`, data: {
+                        // GET RANDOM TAG
+                        tag: titleTagsArr[Math.floor(Math.random() * titleTagsArr.length)]
+                    }}).done(freshPost => { 
+                        post.title = freshPost.title;
+                    });
                 },
                 liveEditWord(keywordObj) {
                     Swal.fire({

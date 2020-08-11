@@ -82,6 +82,8 @@ class AidaGeneratorController extends Controller
         return $img;
     }
 
+    // private function saveImage()
+
     private function generateTitle(Keyword $kw, $tag, $industry, $client) {
         $title = AidaSentence::where('tag_id', $tag)
             ->where('admin_accepted', '1')
@@ -106,6 +108,18 @@ class AidaGeneratorController extends Controller
         } else {
             return $kw['keyword'];
         }
+    }
+
+    public function reGenerateTitle(AidaPost $post, Request $request) {
+        $kw = Keyword::find($post->keyword_id);
+        $tag = $request->input('tag');
+        $industry_id = $post->industry_id;
+        $client = $post->client_id;
+
+        $newTitle = $this->generateTitle($kw, $tag, $industry_id, $client);
+        $post->title = $newTitle;
+        $post->save();
+        return $post;
     }
 
     private function replacePlaceholders($text, $client, $industry, $kw) {
@@ -134,17 +148,17 @@ class AidaGeneratorController extends Controller
 
             $text = str_replace('{firm}', '<b>'.$firm_name.'</b>', $text);
 
-            $text = str_replace('{tel}', '<b>'.$clientModel->tel.'</b>', $text);
+            $text = str_replace('{tel}', $clientModel->tel, $text);
 
-            $text = str_replace('{contactUrl}', '<b>'.$clientModel->contactUrl.'</b>', $text);
+            $text = str_replace('{contactUrl}', $clientModel->contactUrl, $text);
 
-            $text = str_replace('{fb}', '<b>'.$clientModel->fb.'</b>', $text);
+            $text = str_replace('{fb}', $clientModel->fb, $text);
             
-            $text = str_replace('{email}', '<b>'.$clientModel->email.'</b>', $text);
+            $text = str_replace('{email}', $clientModel->email, $text);
 
-            $text = str_replace('{viber}', '<b>'.$clientModel->viber.'</b>', $text);
+            $text = str_replace('{viber}', $clientModel->viber, $text);
 
-            $text = str_replace('{twitter}', '<b>'.$clientModel->twitter.'</b>', $text);
+            $text = str_replace('{twitter}', $clientModel->twitter, $text);
         }
 
         return $text;
