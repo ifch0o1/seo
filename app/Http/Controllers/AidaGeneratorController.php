@@ -82,7 +82,32 @@ class AidaGeneratorController extends Controller
         return $img;
     }
 
-    // private function saveImage()
+    private function saveImage($img, $kw, $client) {
+        /** Determinate the image NAME and PATH */
+        $name = \App\Helpers\HelperFn::transliterate($kw->keyword);
+        $name = str_replace(" ", "-", $name);
+        $relativePath = "public/aida-posts-generated/client-$client";
+        $absolutePath = storage_path("app/$relativePath");
+        $saveFilePath = "$absolutePath/$name.png";
+        $urlPath = "$relativePath/$name.png";
+        if (file_exists($saveFilePath)) {
+            $random = rand(1, 99999999);
+            $saveFilePath = "$absolutePath/$name--$random.png";
+            $urlPath = "$relativePath/$name--$random.png";
+        }
+
+        /** Create directory if not exists */
+        $targetFolderExists = File::isDirectory($absolutePath);
+        if (!$targetFolderExists) {
+            $is_created = Storage::makeDirectory($relativePath, 0777, true, true);;
+        }
+
+        /** Save the image */
+        $img->save($saveFilePath);
+        $imageUrlSrc = url(Storage::url($urlPath));
+
+        return $imageUrlSrc;
+    }
 
     private function generateTitle(Keyword $kw, $tag, $industry, $client) {
         $title = AidaSentence::where('tag_id', $tag)
@@ -118,6 +143,26 @@ class AidaGeneratorController extends Controller
 
         $newTitle = $this->generateTitle($kw, $tag, $industry_id, $client);
         $post->title = $newTitle;
+        $post->save();
+        return $post;
+    }
+
+    public function addImage(AidaPost $post, Request $request) {
+        $kw = Keyword::find($post->keyword_id);
+
+        // $tag = $request->input('tag');
+        // $industry_id = $post->industry_id;
+
+        $client = $post->client_id;
+
+        $folder = $request->input('folder');
+
+        $img = $this->generateImage($kw->keyword, $folder);
+        $imageUrlSrc = $this->saveImage($img, $kw, $client);
+        $imageHtml = $this->getImgHTML($imageUrlSrc, $kw->keyword);
+
+        // $newTitle = $this->generateTitle($kw, $tag, $industry_id, $client);
+        $post->text = $imageHtml .= " <br> $post->text";
         $post->save();
         return $post;
     }
@@ -248,29 +293,7 @@ class AidaGeneratorController extends Controller
                          * ==================================
                          */
                         $img = $this->generateImage($kw->keyword, $value);
-
-                        /** Determinate the image NAME and PATH */
-                        $name = \App\Helpers\HelperFn::transliterate($kw->keyword);
-                        $name = str_replace(" ", "-", $name);
-                        $relativePath = "public/aida-posts-generated/client-$client";
-                        $absolutePath = storage_path("app/$relativePath");
-                        $saveFilePath = "$absolutePath/$name.png";
-                        $urlPath = "$relativePath/$name.png";
-                        if (file_exists($saveFilePath)) {
-                            $random = rand(1, 99999999);
-                            $saveFilePath = "$absolutePath/$name--$random.png";
-                            $urlPath = "$relativePath/$name--$random.png";
-                        }
-
-                        /** Create directory if not exists */
-                        $targetFolderExists = File::isDirectory($absolutePath);
-                        if (!$targetFolderExists) {
-                            $is_created = Storage::makeDirectory($relativePath, 0777, true, true);;
-                        }
-
-                        /** Save the image */
-                        $img->save($saveFilePath);
-                        $imageUrlSrc = url(Storage::url($urlPath));
+                        $imageUrlSrc = $this->saveImage($img, $kw, $client);
 
                         /** Adding the image HTML to the POST. */
                         $post .= $this->getImgHTML($imageUrlSrc, $kw->keyword);

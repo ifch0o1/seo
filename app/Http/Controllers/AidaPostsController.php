@@ -101,6 +101,7 @@ class AidaPostsController extends Controller
     {
         $input = $request->all();
         $aidaPost->fill($input)->save();
+        return $aidaPost;
     }
 
     /**

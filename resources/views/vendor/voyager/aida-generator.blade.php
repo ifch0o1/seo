@@ -70,6 +70,27 @@
 
                                                 {{-- SHOWING TITLE --}}
                                                 <h3 class="text-2xl mb-16" v-html="post.title"></h3>
+
+                                                {{-- ADD NEW IMAGE --}}
+                                                <div class="w-full text-center">
+                                                    <span class="cursor-pointer px-5" @click="addImage(post)" title="Add Image">
+                                                        <i class="voyager-plus"></i> Image
+                                                    </span>
+
+                                                    <a class="cursor-pointer px-5" target="_blank" :href="'/admin/aida-posts/' + post.id + '/edit'" title="Edit post">
+                                                        <i class="voyager-pen"></i> Post
+                                                    </a>
+
+                                                    <span class="cursor-pointer px-5" title="Approve" v-if="!post.approved" @click="changePostStatus(post, 1)">
+                                                        <i class="voyager-check"></i> Approve
+                                                    </span>
+
+                                                    <span class="cursor-pointer px-5" title="Disapprove" v-if="post.approved" @click="changePostStatus(post, 0)">
+                                                        <i class="voyager-x"></i> Disapprove
+                                                    </span>
+                                                </div>
+
+                                                {{-- VIEW POST TEXT --}}
                                                 <div v-html="post.text"></div>
                                             </td>
                                         </tr>
@@ -221,7 +242,8 @@
                 customImageText: '',
                 customImageCss: 'max-width: 100%; max-height: 100%;',
                 cropImageY: '8',
-                cropImageX: '0'
+                cropImageX: '0',
+                editingPost: {}
             },
             methods: {
                 start() {
@@ -299,44 +321,73 @@
                         post.title = freshPost.title;
                     });
                 },
+                addImage(post) {
+                    /** Getting the img-... tag from aida tags */
+                    let tag = this.selectedTags.split(',').find(element => element.indexOf('img-') > -1);
+                    /** Determinate the folder name. */
+                    let folder = tag.split('-').splice(1, tag.length - 1).join('-');
+
+                    $.ajax({url: `/aida_posts/addImage/${post.id}`, data: {
+                        customImageText: this.customImageText,
+                        customImageCss: this.customImageCss,
+                        cropImageY: this.cropImageY,
+                        cropImageX: this.cropImageX,
+                        folder,
+                    }}).done(freshPost => {
+                        post.text = freshPost.text;
+                    })
+                },
+
+                /**
+                 * @param approvalStatus can be 0 or 1 (approved or disapproved)
+                 */
+                changePostStatus(post, approvalStatus) {
+                    $.ajax({
+                        method: "PUT",
+                        url: `/api/aida_posts/${post.id}`,
+                        data: { approved: approvalStatus }
+                    }).done(freshPost => {
+                        post.approved = +freshPost.approved;
+                        this.$forceUpdate();
+                    });
+                },
                 liveEditWord(keywordObj) {
                     Swal.fire({
-                    title: `Editing Keyword #${keywordObj.id}`,
-                    input: "textarea",
-                    inputValue: keywordObj.keyword,
-                    inputAttributes: {
-                        autocapitalize: "off",
-                        id: 'swal_kw_input'
-                    },
-                    showCancelButton: true,
-                    customClass: "swal-wide",
-                    confirmButtonText: "Save",
-                    showLoaderOnConfirm: true,
-                    preConfirm: (keyword) => {
-                        if (!keyword) alert("No keyword value");
+                        title: `Editing Keyword #${keywordObj.id}`,
+                        input: "textarea",
+                        inputValue: keywordObj.keyword,
+                        inputAttributes: {
+                            autocapitalize: "off",
+                            id: 'swal_kw_input'
+                        },
+                        showCancelButton: true,
+                        customClass: "swal-wide",
+                        confirmButtonText: "Save",
+                        showLoaderOnConfirm: true,
+                        preConfirm: (keyword) => {
+                            if (!keyword) alert("No keyword value");
 
-                        let data = {};
-                        data['keyword'] = keyword
-                        $.ajax({
-                            method: "PUT",
-                            url: `/api/keywords/${keywordObj.id}`,
-                            data
-                        })
-                        .done((res) => {
-                            keywordObj.keyword = keyword;
-                        })
-                        .fail((res) => {
-                            console.log('fail');
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error occured',
-                                text: "Cannot save the keyword. Capture the network request for more info",
+                            let data = {};
+                            data['keyword'] = keyword
+                            $.ajax({
+                                method: "PUT",
+                                url: `/api/keywords/${keywordObj.id}`,
+                                data
                             })
-                        })
-                    },
-                    allowOutsideClick: () => !Swal.isLoading(),
-                })
-
+                            .done((res) => {
+                                keywordObj.keyword = keyword;
+                            })
+                            .fail((res) => {
+                                console.log('fail');
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error occured',
+                                    text: "Cannot save the keyword. Capture the network request for more info",
+                                })
+                            })
+                        },
+                        allowOutsideClick: () => !Swal.isLoading(),
+                    })
                 },
                 industryChange(val) {
                     this.loadingKw = true;

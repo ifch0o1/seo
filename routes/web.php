@@ -36,6 +36,9 @@ Route::post('api/aida_posts/generate', "AidaGeneratorController@generate")
 Route::get('/aida_posts/reGenerateTitle/{post}', "AidaGeneratorController@reGenerateTitle")
     ->middleware('auth');
 
+Route::get('/aida_posts/addImage/{post}', "AidaGeneratorController@addImage")
+    ->middleware('auth');
+
 /** 
  * Keywords and Aida_posts for ADMIN PANEL
  * You can found client oriented API routes in api.php
