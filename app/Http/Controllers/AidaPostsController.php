@@ -9,7 +9,7 @@ class AidaPostsController extends Controller
 {
     public function v1_get(Request $request) {
         $client_id = $request->client_id;
-        $include_poor = ($request->include_poor === 'true');
+        $include_poor = (bool)$request->include_poor;
 
         if (!$client_id) {
             /** Validation */

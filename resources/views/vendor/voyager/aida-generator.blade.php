@@ -60,7 +60,7 @@
                                     </thead>
                                     <tbody>
                                         <tr v-for="post in savedPosts">
-                                            <td class="border px-4 py-2">
+                                            <td class="border px-4 py-2" :class="{'opacity-25': post.edited}">
                                                 {{-- GENERATE NEW TITLE --}}
                                                 <div class="w-full text-center">
                                                     <span class="cursor-pointer" @click="reGenerateTitle(post)" title="Refresh Title">
@@ -77,7 +77,7 @@
                                                         <i class="voyager-plus"></i> Image
                                                     </span>
 
-                                                    <a class="cursor-pointer px-5" target="_blank" :href="'/admin/aida-posts/' + post.id + '/edit'" title="Edit post">
+                                                    <a class="cursor-pointer px-5" @click="makeEdited(post)" target="_blank" :href="'/admin/aida-posts/' + post.id + '/edit'" title="Edit post">
                                                         <i class="voyager-pen"></i> Post
                                                     </a>
 
@@ -310,6 +310,10 @@
                     } else {
                         return true
                     }
+                },
+                makeEdited(post) {
+                    post.edited = true;
+                    this.$forceUpdate();
                 },
                 reGenerateTitle(post) {
                     let titleTagsArr = this.titleTags.split(',').filter(val => !!val);
