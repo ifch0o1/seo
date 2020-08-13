@@ -193,6 +193,7 @@ return [
     ],
 
     'additional_js' => [
+        'js/tinymce_custom_init.js',
         'js/custom.js',
         'js/libs/sweetalert2-v9.js',
     ],

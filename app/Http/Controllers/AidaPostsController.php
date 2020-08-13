@@ -18,7 +18,8 @@ class AidaPostsController extends Controller
             /**
              * Base query
              */
-            $posts = AidaPost::where('client_id', $client_id);
+            $posts = AidaPost::where('client_id', $client_id)
+                            ->whereNull('taken_at');
 
             /**
              * Filters
@@ -35,6 +36,34 @@ class AidaPostsController extends Controller
             return collect([
                 'posts' => $posts
             ]);
+        }
+    }
+
+    public function v1_mark_taken(Request $request) {
+        $client_id = $request->client_id;
+        $posts = json_decode($request->input('posts'));
+
+        foreach($posts as $reqPost) {
+            if (!$reqPost) continue;
+
+            $post = AidaPost::where('client_id', $client_id)
+                            ->where('id', $reqPost->id)->first();
+
+            if (!$post) {
+                abort('403', "This post isn't exists for this user.");
+            } else {
+                if (isset($reqPost->published_domain)) 
+                    $post->published_domain = $reqPost->published_domain;
+
+                if (isset($reqPost->publish_date)) 
+                    $post->publish_date = $reqPost->publish_date;
+
+                if (isset($reqPost->publish_url)) 
+                    $post->publish_url = $reqPost->publish_url;
+
+                $post->taken_at = date('Y-m-d H:i:s');
+                $post->save();
+            }
         }
     }
     /**
