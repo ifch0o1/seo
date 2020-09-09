@@ -129,6 +129,9 @@ class AidaGeneratorController extends Controller
             $this->used_title_sentences[] = $title->id;
             $titleText = $this->replacePlaceholders($title->text, $client, $industry, $kw);
 
+            $titleText = str_replace('"', "", $titleText);
+            $titleText = str_replace("'", "", $titleText);
+
             return strip_tags($titleText);
         } else {
             return strip_tags($kw['keyword']);

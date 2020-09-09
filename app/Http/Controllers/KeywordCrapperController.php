@@ -8,6 +8,7 @@ use App\Industry;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class KeywordCrapperController extends Controller {
     /**
@@ -101,7 +102,7 @@ class KeywordCrapperController extends Controller {
                 "level" => $kw['level'],
                 "keyword" => $kw['name'],
                 "crap_id" => $crap_id,
-                "admin_accepted" => $kw['admin_accepted'] ?: 0,
+                "admin_accepted" => isset($kw['admin_accepted']) ? $kw['admin_accepted'] : 0,
                 'parent_keyword_id' => $parent_keyword_id,
                 'industry_id' => $industry,
                 'created_at' => date('Y-m-d H:i:s')
@@ -240,7 +241,14 @@ class KeywordCrapperController extends Controller {
         $lang = urlencode($request->input('lang'));
         $id = $request->input('id');
 
-        $suggestions_arr = Http::get(env('SELENIUM_SERVER_ADDRESS') . "/api/get_related_keywords?keyword=$keyword->keyword&lang=$lang&id=$id");
+        $encodedKeyword = urlencode($keyword->keyword);
+        Log::info("\$encodedKeyword: $encodedKeyword");
+        $link = env('SELENIUM_SERVER_ADDRESS') . "/api/get_related_keywords?keyword={$encodedKeyword}&lang={$lang}&id={$id}";
+
+        Log::info("Link for send_get_related_keywords_to_local_server:245 - '{$link}'");
+        $suggestions_arr = Http::get($link);
+        Log::info("ARR: ");
+        Log::info(print_r($suggestions_arr));
         $suggestions_arr = json_decode($suggestions_arr->body());
 
         foreach ($suggestions_arr as $k => $suggestedKeyword) {

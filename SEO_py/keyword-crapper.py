@@ -118,10 +118,10 @@ r = requests.post(apiUrl,
                     # json={'keywords_json': result, 'industry': industry},
                     headers={'Content-Type': 'application/json; charset=utf-8'})
 
-print("Sending request to php... The response is:")
+print("Data is:")
+print(print(json.dumps(json.dumps({'keywords_json': result, 'industry': industry}))))
+print("Sending request to php with the data... The response is:")
 
 print(r.text)
-
-print(json.dumps(json.dumps({'keywords_json': result, 'industry': industry})))
 
 driver.quit()
