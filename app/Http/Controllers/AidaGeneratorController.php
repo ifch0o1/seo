@@ -60,9 +60,8 @@ class AidaGeneratorController extends Controller
         $img->flip('h');
         $img->gamma(0.7);
 
-        $font_size = round($cut_width / 80);
-
-        $img->text($keyword, $cut_width / 2, $cut_height / 2, function($font, $font_size) {
+        $font_size = round($img->width() / (strlen($keyword) * 0.6));
+        $img->text($keyword, $cut_width / 2, $cut_height / 2, function($font) use ($font_size) {
             $font->file(resource_path('fonts/Roboto/Roboto-Black.ttf'));
             $font->size($font_size);
             $font->color('#ffffff');
@@ -70,10 +69,10 @@ class AidaGeneratorController extends Controller
             $font->valign('top');
         });
 
-        $font_size_custom_text = round($cut_width / 72);
+        $font_size_custom_text = round($img->width() / (strlen($keyword) * 0.6));
         $customImageText = $request->input('customImageText');
         if ($customImageText) {
-            $img->text($customImageText, $cut_width / 2, $cut_height / 1.5, function($font, $font_size_custom_text) {
+            $img->text($customImageText, $cut_width / 2, $cut_height / 1.5, function($font) use ($font_size_custom_text) {
                 $font->file(resource_path('fonts/Roboto/Roboto-Black.ttf'));
                 $font->size($font_size_custom_text);
                 $font->color('#ffffff');
