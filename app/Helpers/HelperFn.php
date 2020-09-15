@@ -25,4 +25,8 @@ class HelperFn {
     public static function reverseNumber($num, $min, $max) {
         return ($max + $min) - $num;
     }
+
+    public static function autofit_text_to_image( $canvas_image_filename = false, $dest_filename = 'output.jpg', $text = '', $starting_font_size = 60, $max_width = 500, $max_height = 500, $x_pos = 0, $y_pos = 0, $font_file = false, $font_color = 'black', $line_height_ratio = 1, $dest_format = 'jpg' ) {
+        // https://gist.github.com/clifgriffin/728cc3a4ce7b81fa2d8a
+    }
 }
